@@ -9,16 +9,30 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import kjipo.com.microphoneinput.R
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.BufferedInputStream
+import java.io.File
+import java.io.FileInputStream
+import java.nio.Buffer
+import java.nio.ByteBuffer
 
 class MainActivity : AppCompatActivity() {
     private lateinit var audioManager: AudioManager
     private var selectedInputDevice = 0
 
+    private lateinit var pipePath: File
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+//        pipePath = applicationContext.filesDir.resolve ("/data/com.kjipo.microphoneinput/record_pipe")
+        pipePath = File ("/data/data/com.kjipo.microphoneinput/record_pipe")
+
+
 
         val recordPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) === PackageManager.PERMISSION_GRANTED;
         if (!recordPermissionGranted) {
@@ -61,13 +75,60 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun startRecording() {
-        val recordPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) === PackageManager.PERMISSION_GRANTED;
+        val recordPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) === PackageManager.PERMISSION_GRANTED
         if (!recordPermissionGranted) {
             requestRecordPermission()
             return
         }
 
         MicrophoneRecording.startRecording()
+
+        val testThread = Thread {
+            val pipeFile = File(pipePath.absolutePath)
+
+            while(!pipeFile.exists()) {
+                Thread.sleep(500)
+                Log.i("Main", "Pipe file does not exist")
+            }
+
+            Log.i("Main", "Found pipe file")
+//            val fileInputStream = FileInputStream(pipePath)
+//            val byteBuffer = ByteBuffer.allocate(100)
+//
+//            while(true) {
+//                val bytesRead = fileInputStream.channel.read(byteBuffer)
+//
+//                Log.i("Main", "Bytes read: $bytesRead")
+//
+//
+////                fileInputStream.close()
+//                Thread.sleep(200)
+//            }
+
+            Log.i("Main", "Test26")
+            val outputStream = FileInputStream(pipePath)
+            Log.i("Main", "Test27")
+
+            while (true) {
+                Thread.sleep(200)
+
+                Log.i("Main", "Test25")
+
+                Log.i("Main", "Available bytes: ${outputStream.available()}")
+
+                Log.i("Main", "Read byte: ${outputStream.read()}")
+
+//                    if (it.available() > 0) {
+//                        Log.i("Main", "Found byte")
+//                        it.read()
+//                    }
+            }
+
+        }
+        testThread.start()
+
+
+
 
 
     }
