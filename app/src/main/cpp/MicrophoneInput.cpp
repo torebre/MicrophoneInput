@@ -26,15 +26,14 @@ void MicrophoneInput::create() {
     AudioStream *stream;
     Result r = builder.openStream(&stream);
 
-    if(r != Result::OK) {
+    if (r != Result::OK) {
         LOGE("Error opening stream: %s", convertToText(r));
     }
 
     r = stream->requestStart();
-    if(r != Result::OK) {
+    if (r != Result::OK) {
         LOGE("Error starting stream: %s", convertToText(r));
     }
-
 
 
 }
@@ -66,23 +65,21 @@ void MicrophoneInput::startRecording() {
         warnIfNotLowLatency(recordingStream);
 
         struct stat stat_p;
-        if(stat(pipeFile, &stat_p) == 0) {
+        if (stat(pipeFile, &stat_p) == 0) {
             int returnCode = remove(pipeFile);
-            if(returnCode!= 0) {
+            if (returnCode != 0) {
                 LOGE("Failed to remove pipe file. Return code: %d", returnCode);
             }
-        }
-        else {
+        } else {
             LOGI("Pipe file does not already exist");
         }
 
         auto fifo = mkfifo(pipeFile, 0777); //S_IFIFO | S_IRWXU);
 
 
-        if(fifo != 0) {
+        if (fifo != 0) {
             LOGE("Failed to create FIFO file. Return code: %d", fifo);
-        }
-        else {
+        } else {
             LOGI("Created FIFO file");
         }
 
@@ -123,9 +120,11 @@ oboe::DataCallbackResult MicrophoneInput::onAudioReady(
     LOGI("Test23");
 
 
+    LOGI("DATA VALUE FOUND %d", (int) sizeof(uint8_t) * inputChannelCount * numFrames);
+    char *test = "Test data";
+//    write(writefd, test, strlen(test));
 
-    char *test ="Test data";
-    write(writefd, test, strlen(test));
+    write(writefd, static_cast<char *>(audioData), sizeof(uint8_t) * inputChannelCount * numFrames);
 
 //    if(streamFile == nullptr) {
 //
@@ -145,7 +144,7 @@ oboe::DataCallbackResult MicrophoneInput::onAudioReady(
 
 //        memset(static_cast<uint8_t *>(audioData), 0,
 //               sizeof(int16_t) * inputChannelCount * numFrames);
-//        LOGI("DATA VALUE FOUND %d",(int)sizeof(uint8_t) * inputChannelCount * numFrames);
+
 //
 //
 //    if(streamFile == nullptr) {
@@ -164,7 +163,7 @@ oboe::DataCallbackResult MicrophoneInput::onAudioReady(
 //    streamFile = nullptr;
 
 
-        LOGI("Wrote data");
+    LOGI("Wrote data");
 
 //    }
 
@@ -233,7 +232,7 @@ oboe::DataCallbackResult MicrophoneInput::onAudioReady(
  * @param error: oboe's reason for closing the stream
  */
 void MicrophoneInput::onErrorBeforeClose(oboe::AudioStream *oboeStream,
-                                          oboe::Result error) {
+                                         oboe::Result error) {
     LOGE("%s stream Error before close: %s",
          oboe::convertToText(oboeStream->getDirection()),
          oboe::convertToText(error));
@@ -246,7 +245,7 @@ void MicrophoneInput::onErrorBeforeClose(oboe::AudioStream *oboeStream,
  * @param error
  */
 void MicrophoneInput::onErrorAfterClose(oboe::AudioStream *oboeStream,
-                                         oboe::Result error) {
+                                        oboe::Result error) {
     LOGE("%s stream Error after close: %s",
          oboe::convertToText(oboeStream->getDirection()),
          oboe::convertToText(error));

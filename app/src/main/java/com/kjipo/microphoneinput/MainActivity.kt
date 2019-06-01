@@ -92,36 +92,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             Log.i("Main", "Found pipe file")
-//            val fileInputStream = FileInputStream(pipePath)
-//            val byteBuffer = ByteBuffer.allocate(100)
-//
-//            while(true) {
-//                val bytesRead = fileInputStream.channel.read(byteBuffer)
-//
-//                Log.i("Main", "Bytes read: $bytesRead")
-//
-//
-////                fileInputStream.close()
-//                Thread.sleep(200)
-//            }
 
-            Log.i("Main", "Test26")
             val outputStream = FileInputStream(pipePath)
-            Log.i("Main", "Test27")
 
-            while (true) {
-                Thread.sleep(200)
+            var readByte = outputStream.read()
+            while (readByte != -1) {
 
-                Log.i("Main", "Test25")
+                Log.i("Main", "Read byte: $readByte")
 
-                Log.i("Main", "Available bytes: ${outputStream.available()}")
-
-                Log.i("Main", "Read byte: ${outputStream.read()}")
-
-//                    if (it.available() > 0) {
-//                        Log.i("Main", "Found byte")
-//                        it.read()
-//                    }
+                readByte = outputStream.read()
             }
 
         }
