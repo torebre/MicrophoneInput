@@ -1,7 +1,8 @@
 #include <jni.h>
 #include <string>
+#include <essentia/algorithmfactory.h>
+#include <essentia/pool.h>
 
-//#include <logging_macros.h>
 #include "../../../../../../projects/oboe/src/common/OboeDebug.h"
 #include "MicrophoneInput.h"
 
@@ -58,6 +59,19 @@ Java_com_kjipo_microphoneinput_MicrophoneRecording_setRecordingDeviceId(
     }
 
     engine->setRecordingDeviceId(deviceId);
+}
+
+
+
+void Java_com_kjipo_microphoneinput_MicrophoneRecording_initializeEssentia(JNIEnv* env, jclass clazz) {
+    // Parameters
+    LOGI("C++", "Initializing Essentia");
+
+    essentia::init();
+
+    essentia::Pool pool;
+
+
 }
 
 

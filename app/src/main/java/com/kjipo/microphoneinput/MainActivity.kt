@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupAudioDeviceCallback()
+        MicrophoneRecording.initializeEssentia()
 
         btnStart.setOnClickListener { startRecording() }
         btnStop.setOnClickListener { stopRecording() }
@@ -98,7 +99,6 @@ class MainActivity : AppCompatActivity() {
             var readByte = outputStream.read()
             while (readByte != -1) {
 
-                Log.i("Main", "Read byte: $readByte")
 
                 readByte = outputStream.read()
             }

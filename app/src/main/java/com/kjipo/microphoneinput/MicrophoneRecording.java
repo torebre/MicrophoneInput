@@ -6,6 +6,7 @@ public enum MicrophoneRecording {
 
 
     static {
+//        System.loadLibrary("libessentia");
         System.loadLibrary("native-lib");
     }
 
@@ -13,6 +14,7 @@ public enum MicrophoneRecording {
     static native void startRecording();
     static native void stop();
     static native void setRecordingDeviceId(int deviceId);
+    static native void initializeEssentia();
 
 
 }

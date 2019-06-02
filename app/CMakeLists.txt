@@ -28,6 +28,18 @@ add_subdirectory(${OBOE_DIR} ./oboe-bin)
 
 include_directories(${OBOE_DIR}/include)
 
+
+
+include_directories(/home/student/workspace/MicrophoneInput/module/lib/x86_64/include/)
+add_library(libessentia SHARED IMPORTED)
+
+# TODO: Use ABI variable
+
+set_target_properties(libessentia
+        PROPERTIES IMPORTED_LOCATION
+        /home/student/workspace/MicrophoneInput/module/lib/x86_64/libessentia.so)
+
+
 # Searches for a specified prebuilt library and stores the path as a
 # variable. Because CMake includes system libraries in the search path by
 # default, you only need to specify the name of the public NDK library
@@ -55,4 +67,6 @@ target_link_libraries( # Specifies the target library.
                        # included in the NDK.
                        ${log-lib}
 
-        oboe)
+        oboe
+        libessentia)
+

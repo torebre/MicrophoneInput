@@ -3,17 +3,21 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 25
+    compileSdkVersion 26
     defaultConfig {
         applicationId "com.kjipo.microphoneinput"
-        minSdkVersion 24
-        targetSdkVersion 25
+        minSdkVersion 26
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
             cmake {
                 cppFlags "-std=c++11"
+//                arguments "-DAPP_STL=c++_shared"
+//                arguments "-DAPP_STL=c++_static"
+
+                arguments '-DANDROID_STL=c++_shared'
             }
         }
     }
@@ -28,6 +32,24 @@ android {
             path "CMakeLists.txt"
         }
     }
+
+    sourceSets {
+        main {
+            // let gradle pack the shared library into apk
+            // Needs to have this structure and x86_64 as a subfolder for the library to be included
+            jniLibs.srcDirs = ['../module/lib']
+//            jniLibs.srcDirs = ['/home/student/workspace/MicrophoneInput/module/x86_64/lib/']
+        }
+    }
+
+
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'x86_64' // 'armeabi-v7a', 'mips'
+        }
+    }
 }
 
 dependencies {
@@ -35,7 +57,7 @@ dependencies {
     androidTestImplementation('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    implementation 'com.android.support:appcompat-v7:25.4.0'
+    implementation 'com.android.support:appcompat-v7:26.1.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     testImplementation 'junit:junit:4.12'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
