@@ -1,5 +1,6 @@
 #include "MicrophoneInput.h"
 #include "../../../../../../projects/oboe/src/common/OboeDebug.h"
+#include "FileDescriptorOutputSingle.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -18,15 +19,15 @@
 #include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/streaming/streamingalgorithm.h>
 #include <essentia/streaming/algorithms/fileoutput.h>
-#include <essentia/streaming/algorithms/filedescriptoroutputsingle.h>
+//#include <essentia/streaming/algorithms/filedescriptoroutputsingle.h>
 
 #include <essentia/streaming/algorithms/vectoroutput.h>
 #include <essentia/streaming/algorithms/diskwriter.h>
 #include <essentia/streaming/algorithms/devnull.h>
 
 
-
 using namespace oboe;
+
 
 void MicrophoneInput::create() {
     AudioStreamBuilder builder;
@@ -55,12 +56,11 @@ void MicrophoneInput::startRecording() {
 
     builder.setDeviceId(recordingDeviceId);
     builder.setDirection(oboe::Direction::Input);
-    builder.setSampleRate(sampleRate);
+//    builder.setSampleRate(sampleRate);
 //    builder.setBufferCapacityInFrames(200); // TODO Just setting this value for testing
     builder.setChannelCount(inputChannelCount);
     builder.setAudioApi(audioApi);
     builder.setFormat(format);
-//    builder.setFormat(AudioFormat::Float);
     builder.setSharingMode(oboe::SharingMode::Exclusive);
     builder.setPerformanceMode(oboe::PerformanceMode::LowLatency);
     builder.setCallback(this);
@@ -69,8 +69,8 @@ void MicrophoneInput::startRecording() {
 
     if (result == oboe::Result::OK && recordingStream) {
         assert(recordingStream->getChannelCount() == inputChannelCount);
-        assert(recordingStream->getSampleRate() == sampleRate);
-        assert(recordingStream->getFormat() == oboe::AudioFormat::I16);
+//        assert(recordingStream->getSampleRate() == sampleRate);
+        assert(recordingStream->getFormat() == oboe::AudioFormat::Float);
 
         warnIfNotLowLatency(recordingStream);
 
@@ -99,11 +99,11 @@ void MicrophoneInput::startRecording() {
 
 
         network = new essentia::scheduler::Network(gen);
-        network->runPrepare();
+//        network->runPrepare();
 
 
 // TODO Is it necessary to run this here?
-    audioProcessor = std::thread(&MicrophoneInput::runNetwork, this);
+        audioProcessor = std::thread(&MicrophoneInput::runNetwork, this);
 
         recordingStream->requestStart();
     } else {
@@ -158,7 +158,7 @@ oboe::DataCallbackResult MicrophoneInput::onAudioReady(
 
     gen->add(&convertedData[0], samplesToRead);
 
-    network->runStep();
+//    network->runStep();
 //    while(network->runStep()) {
 //        // Do nothing
 //    }
@@ -198,13 +198,7 @@ void MicrophoneInput::onErrorAfterClose(oboe::AudioStream *oboeStream,
 
 
 void MicrophoneInput::setupNetwork() {
-
     essentia::streaming::AlgorithmFactory &factory = essentia::streaming::AlgorithmFactory::instance();
-
-//    gen = static_cast<RingBufferInput*>(streaming::AlgorithmFactory::create("RingBufferInput", "bufferSize", frameSize));
-//    essentia::streaming::Algorithm *gen = factory.create("RingBufferInput",
-//                                                        "bufferSize", 100000);
-
 
     gen = new essentia::streaming::RingBufferInput();
     gen->declareParameters();
@@ -217,65 +211,34 @@ void MicrophoneInput::setupNetwork() {
     gen->output(0).setAcquireSize(frameSize);
     gen->output(0).setReleaseSize(frameSize);
 
-//    essentia::streaming::Algorithm *fc = factory.create("FrameCutter",
-//                                                        "frameSize", frameSize,
-//                                                        "hopSize", hopSize);
-////
-//    essentia::streaming::Algorithm *w = factory.create("Windowing",
-//                                                       "type", "hann");
-//    essentia::streaming::Algorithm *spec = factory.create("Spectrum");
-//
-//    gen->output("signal") >> fc->input("signal");
-//
-//    fc->output("frame") >> w->input("frame");
-//    w->output("frame") >> spec->input("frame");
-//    essentia::streaming::Algorithm *pitchYinFft = essentia::streaming::AlgorithmFactory::create(
-//            "PitchYinFFT",
-//            "frameSize", frameSize);
-//    spec->output("spectrum") >> pitchYinFft->input("spectrum");
-//    pitchYinFft->output("pitch") >> essentia::streaming::PoolConnector(pool, "pitch");
+    essentia::streaming::Algorithm *fc = factory.create("FrameCutter",
+                                                        "frameSize", frameSize,
+                                                        "hopSize", hopSize);
+
+    essentia::streaming::Algorithm *w = factory.create("Windowing",
+                                                       "type", "hann");
+    essentia::streaming::Algorithm *spec = factory.create("Spectrum");
+
+    gen->output("signal") >> fc->input("signal");
+
+    fc->output("frame") >> w->input("frame");
+    w->output("frame") >> spec->input("frame");
+    essentia::streaming::Algorithm *pitchYinFft = essentia::streaming::AlgorithmFactory::create(
+            "PitchYinFFT",
+            "frameSize", frameSize,
+            "sampleRate", recordingStream->getSampleRate());
+    spec->output("spectrum") >> pitchYinFft->input("spectrum");
+    pitchYinFft->output("pitch") >> essentia::streaming::PoolConnector(pool, "pitch");
 //    pitchYinFft->output("pitchConfidence")
 //            >> essentia::streaming::PoolConnector(pool, "pitch_confidence");
 
+    // TODO Temporarily piping pitch confidence to nowhere
+    pitchYinFft->output("pitchConfidence") >> essentia::streaming::NOWHERE;
 
 
+    essentia::streaming::FileDescriptorOutputSingle2 *outputWriter = new essentia::streaming::FileDescriptorOutputSingle2(
+            writefd);
 
-//    spec->output("spectrum") >> essentia::streaming::PoolConnector(pool, "spectrum");
-
-
-//    essentia::streaming::Algorithm *pitchMelodia = essentia::streaming::AlgorithmFactory::create(
-//            "PitchMelodia", "frameSize", frameSize,
-//            "hopSize", hopSize, "guessUnvoiced", true);
-//    gen->output("signal") >> pitchMelodia->input("signal");
-
-//    pitchMelodia->output("pitch") >> essentia::streaming::PoolConnector(pool, "melodia_pitch");
-//    pitchMelodia->output("pitchConfidence")
-//            >> essentia::streaming::PoolConnector(pool, "melodia_pitch_confidence");
-
- essentia::streaming::FileDescriptorOutputSingle* outputWriter = new essentia::streaming::FileDescriptorOutputSingle(writefd);
-
- //    pitchMelodia->output("pitch") >> outputWriter.input("data");
-
-//    pitchYinFft->output("pitch") >> outputWriter.input("data");
-
-//    essentia::streaming::FileDescriptorOutputSingle *test = &outputWriter;
-//    gen->output("signal") >> outputWriter.input("data");
-
-
-//    essentia::streaming::Algorithm *fileWriter = factory.create("FileOutput");
-//    gen->output("signal") >> fileWriter->input("data");
-
-//    essentia::streaming::connect(gen->output("signal"), outputWriter.input("data"));
-
-
-//    essentia::streaming::DiskWriter<std::vector<essentia::Real>>* diskWriter = new essentia::streaming::DiskWriter<std::vector<essentia::Real>>("test_file");
-
-//    std::vector<essentia::Real> outputVector;
-//    outputVector.reserve(10000);
-//    essentia::streaming::VectorOutput<essentia::Real, essentia::Real>* vectorOutput = new essentia::streaming::VectorOutput<essentia::Real, essentia::Real>(&outputVector);
-
-    essentia::streaming::connect(gen->output("signal"), outputWriter->input("data"));
-
-//    essentia::streaming::connect(gen->output("signal"), essentia::streaming::NOWHERE);
+    essentia::streaming::connect(pitchYinFft->output("pitch"), outputWriter->input("data"));
 
 }

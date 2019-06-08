@@ -1,10 +1,7 @@
 package com.kjipo.microphoneinput
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
-import android.media.AudioDeviceCallback
-import android.media.AudioDeviceInfo
 import android.media.AudioManager
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
@@ -15,7 +12,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileInputStream
-import java.nio.Buffer
 import java.nio.ByteBuffer
 
 class MainActivity : AppCompatActivity() {
@@ -85,6 +81,12 @@ class MainActivity : AppCompatActivity() {
         MicrophoneRecording.startRecording()
 
         val testThread = Thread {
+            val bytes = ByteArray(4) {
+                0
+            }
+            var counter = 0
+
+
             val pipeFile = File(pipePath.absolutePath)
 
             while(!pipeFile.exists()) {
@@ -94,15 +96,22 @@ class MainActivity : AppCompatActivity() {
 
             Log.i("Main", "Found pipe file")
 
-            val outputStream = FileInputStream(pipePath)
+            val inputStream = FileInputStream(pipePath)
 
-            var readByte = outputStream.read()
-            while (readByte != -1) {
+            val bufferedInputStream = BufferedInputStream(inputStream)
 
 
-                Log.i("Main", "Read byte: $readByte")
+            while(true) {
+                val read = inputStream.read(bytes)
+                if(read != 4) {
+                    break
+                }
+                bytes.reverse()
+                val buffer = ByteBuffer.wrap(bytes)
+                val readInt = buffer.int
 
-                readByte = outputStream.read()
+                val pitchValue = java.lang.Float.intBitsToFloat(readInt)
+                Log.i("Main", "Pitch: ${pitchValue}. Integer: $readInt")
             }
 
         }
@@ -126,20 +135,6 @@ class MainActivity : AppCompatActivity() {
                 arrayOf(Manifest.permission.RECORD_AUDIO),
                 0)
     }
-
-//    /**
-//     * A native method that is implemented by the 'native-lib' native library,
-//     * which is packaged with this application.
-//     */
-//    external fun stringFromJNI(): String
-//
-//    companion object {
-//
-//        // Used to load the 'native-lib' library on application startup.
-//        init {
-//            System.loadLibrary("native-lib")
-//        }
-//    }
 
     override fun onResume() {
         super.onResume()

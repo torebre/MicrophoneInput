@@ -31,12 +31,12 @@ public:
 
 private:
     int32_t recordingDeviceId = oboe::kUnspecified;
-    // TODO Set sample rate not using constant here
-    int32_t sampleRate = 48000;
+
+    //    int32_t sampleRate = 48000;
     int32_t inputChannelCount = oboe::ChannelCount::Mono;
     oboe::AudioStream *recordingStream = nullptr;
     oboe::AudioApi audioApi = oboe::AudioApi::AAudio;
-    oboe::AudioFormat format = oboe::AudioFormat::I16;
+    oboe::AudioFormat format = oboe::AudioFormat::Float;
 
     // TODO Take this as input from Java side
     const char *pipeFile = "/data/data/com.kjipo.microphoneinput/record_pipe";
