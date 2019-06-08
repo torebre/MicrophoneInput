@@ -100,6 +100,8 @@ class MainActivity : AppCompatActivity() {
             while (readByte != -1) {
 
 
+                Log.i("Main", "Read byte: $readByte")
+
                 readByte = outputStream.read()
             }
 
