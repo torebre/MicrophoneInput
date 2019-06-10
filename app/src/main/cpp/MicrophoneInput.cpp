@@ -19,14 +19,26 @@
 #include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/streaming/streamingalgorithm.h>
 #include <essentia/streaming/algorithms/fileoutput.h>
-//#include <essentia/streaming/algorithms/filedescriptoroutputsingle.h>
 
 #include <essentia/streaming/algorithms/vectoroutput.h>
 #include <essentia/streaming/algorithms/diskwriter.h>
 #include <essentia/streaming/algorithms/devnull.h>
 
+#include <iostream>
+#include <fstream>
+
 
 using namespace oboe;
+
+
+MicrophoneInput::MicrophoneInput(const char* pitchFifoInput, const char* pitchConfidenceFifoInput): pitchFifo(pitchFifoInput), pitchConfidenceFifo(pitchConfidenceFifoInput) {
+
+}
+
+MicrophoneInput::~MicrophoneInput() {
+//    outputFile.close();
+}
+
 
 
 void MicrophoneInput::create() {
@@ -56,8 +68,7 @@ void MicrophoneInput::startRecording() {
 
     builder.setDeviceId(recordingDeviceId);
     builder.setDirection(oboe::Direction::Input);
-//    builder.setSampleRate(sampleRate);
-//    builder.setBufferCapacityInFrames(200); // TODO Just setting this value for testing
+    builder.setSampleRate(sampleRate);
     builder.setChannelCount(inputChannelCount);
     builder.setAudioApi(audioApi);
     builder.setFormat(format);
@@ -69,14 +80,14 @@ void MicrophoneInput::startRecording() {
 
     if (result == oboe::Result::OK && recordingStream) {
         assert(recordingStream->getChannelCount() == inputChannelCount);
-//        assert(recordingStream->getSampleRate() == sampleRate);
         assert(recordingStream->getFormat() == oboe::AudioFormat::Float);
+        assert(recordingStream->getSampleRate() == sampleRate);
 
         warnIfNotLowLatency(recordingStream);
 
         struct stat stat_p;
-        if (stat(pipeFile, &stat_p) == 0) {
-            int returnCode = remove(pipeFile);
+        if (stat(pitchFifo, &stat_p) == 0) {
+            int returnCode = remove(pitchFifo);
             if (returnCode != 0) {
                 LOGE("Failed to remove pipe file. Return code: %d", returnCode);
             }
@@ -84,7 +95,12 @@ void MicrophoneInput::startRecording() {
             LOGI("Pipe file does not already exist");
         }
 
-        auto fifo = mkfifo(pipeFile, 0777); //S_IFIFO | S_IRWXU);
+        auto fifo = mkfifo(pitchFifo, 0777); //S_IFIFO | S_IRWXU);
+
+//        outputFile.open("/data/data/com.kjipo.microphoneinput/test_output2.txt", std::ios::trunc);
+
+
+
 
 
         if (fifo != 0) {
@@ -93,13 +109,25 @@ void MicrophoneInput::startRecording() {
             LOGI("Created FIFO file");
         }
 
-        writefd = open(pipeFile, O_RDWR);
+        writefd = open(pitchFifo, O_RDWR);
+
+        if (stat(pitchConfidenceFifo, &stat_p) == 0) {
+            int returnCode = remove(pitchConfidenceFifo);
+            if (returnCode != 0) {
+                LOGE("Failed to remove pipe file. Return code: %d", returnCode);
+            }
+        } else {
+            LOGI("Pipe file does not already exist");
+        }
+
+        auto confidenceFifo = mkfifo(pitchConfidenceFifo, 0777); //S_IFIFO | S_IRWXU);
+
+        writeConfidenceFifo = open(pitchConfidenceFifo, O_RDWR);
 
         setupNetwork();
 
 
         network = new essentia::scheduler::Network(gen);
-//        network->runPrepare();
 
 
 // TODO Is it necessary to run this here?
@@ -144,19 +172,21 @@ oboe::DataCallbackResult MicrophoneInput::onAudioReady(
         oboe::AudioStream *oboeStream, void *audioData, int32_t numFrames) {
     assert(oboeStream == recordingStream);
 
-    const int samplesToRead = inputChannelCount * numFrames * oboeStream->getBytesPerFrame();
-    LOGI("DATA VALUE FOUND %d", (int) sizeof(uint8_t) * samplesToRead);
 
+//    const int samplesToRead = inputChannelCount * numFrames * oboeStream->getBytesPerFrame();
+    const int samplesToRead = numFrames; //inputChannelCount * numFrames * oboeStream->getBytesPerFrame();
+//    LOGI("DATA VALUE FOUND %d", (int) sizeof(uint8_t) * samplesToRead);
 
-//    write(writefd, static_cast<char *>(audioData), sizeof(uint8_t) * samplesToRead);
+//    auto *castAudioData = static_cast<uint8_t *>(audioData);
+    auto *castAudioData = static_cast<float*>(audioData);
+//    float convertedData[samplesToRead];
+//    for (int i = 0; i < samplesToRead; ++i) {
+//        outputFile << unsigned(castAudioData[i]) << "\n";
+//    }
+//    outputFile.flush();
+//    outputFile.close();
 
-    uint8_t *castAudioData = static_cast<uint8_t *>(audioData);
-    float convertedData[samplesToRead];
-    for (int i = 0; i < samplesToRead; ++i) {
-        convertedData[i] = castAudioData[i];
-    }
-
-    gen->add(&convertedData[0], samplesToRead);
+    gen->add(&castAudioData[0], samplesToRead);
 
 //    network->runStep();
 //    while(network->runStep()) {
@@ -213,32 +243,35 @@ void MicrophoneInput::setupNetwork() {
 
     essentia::streaming::Algorithm *fc = factory.create("FrameCutter",
                                                         "frameSize", frameSize,
-                                                        "hopSize", hopSize);
+                                                        "hopSize", hopSize,
+                                                        "startFromZero", true);
 
-    essentia::streaming::Algorithm *w = factory.create("Windowing",
-                                                       "type", "hann");
-    essentia::streaming::Algorithm *spec = factory.create("Spectrum");
+//    essentia::streaming::Algorithm *w = factory.create("Windowing",
+//                                                       "type", "hann",
+//                                                       "size", windowSize);
+//    essentia::streaming::Algorithm *spec = factory.create("Spectrum");
 
     gen->output("signal") >> fc->input("signal");
 
-    fc->output("frame") >> w->input("frame");
-    w->output("frame") >> spec->input("frame");
-    essentia::streaming::Algorithm *pitchYinFft = essentia::streaming::AlgorithmFactory::create(
-            "PitchYinFFT",
-            "frameSize", frameSize,
-            "sampleRate", recordingStream->getSampleRate());
-    spec->output("spectrum") >> pitchYinFft->input("spectrum");
-    pitchYinFft->output("pitch") >> essentia::streaming::PoolConnector(pool, "pitch");
-//    pitchYinFft->output("pitchConfidence")
-//            >> essentia::streaming::PoolConnector(pool, "pitch_confidence");
+//    fc->output("frame") >> w->input("frame");
+//    w->output("frame") >> spec->input("frame");
 
-    // TODO Temporarily piping pitch confidence to nowhere
-    pitchYinFft->output("pitchConfidence") >> essentia::streaming::NOWHERE;
+    essentia::streaming::Algorithm *pitchYin = essentia::streaming::AlgorithmFactory::create(
+            "PitchYin",
+            "sampleRate", recordingStream->getSampleRate(),
+            "frameSize", frameSize);
+//    spec->output("spectrum") >> pitchYinFft->input("spectrum");
 
+    fc->output("frame") >> pitchYin->input("signal");
 
-    essentia::streaming::FileDescriptorOutputSingle2 *outputWriter = new essentia::streaming::FileDescriptorOutputSingle2(
+    auto *outputWriter = new essentia::streaming::FileDescriptorOutputSingle2(
             writefd);
 
-    essentia::streaming::connect(pitchYinFft->output("pitch"), outputWriter->input("data"));
+    essentia::streaming::connect(pitchYin->output("pitch"), outputWriter->input("data"));
+
+    auto *confidenceWriter = new essentia::streaming::FileDescriptorOutputSingle2(
+            writeConfidenceFifo);
+
+    pitchYin->output("pitchConfidence") >> confidenceWriter->input("data");
 
 }

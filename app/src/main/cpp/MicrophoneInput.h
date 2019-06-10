@@ -2,8 +2,6 @@
 #define MICROPHONEINPUT_MICROPHONEINPUT_H
 
 #include <oboe/Oboe.h>
-//#include <fstream>
-//#include <iostream>
 #include <essentia/pool.h>
 #include <essentia/scheduler/network.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
@@ -13,9 +11,17 @@
 #include <essentia/scheduler/network.h>
 
 
+#include <iostream>
+#include <fstream>
+
+
 class MicrophoneInput : public oboe::AudioStreamCallback {
 
 public:
+    MicrophoneInput(const char* pitchFifo, const char* pitchConfidenceFifo);
+
+    ~MicrophoneInput();
+
     void create();
     void startRecording();
     void stop();
@@ -31,17 +37,18 @@ public:
 
 private:
     int32_t recordingDeviceId = oboe::kUnspecified;
-
-    //    int32_t sampleRate = 48000;
     int32_t inputChannelCount = oboe::ChannelCount::Mono;
     oboe::AudioStream *recordingStream = nullptr;
     oboe::AudioApi audioApi = oboe::AudioApi::AAudio;
     oboe::AudioFormat format = oboe::AudioFormat::Float;
 
-    // TODO Take this as input from Java side
-    const char *pipeFile = "/data/data/com.kjipo.microphoneinput/record_pipe";
+    const char* pitchFifo;
+    const char* pitchConfidenceFifo;
 
     int writefd;
+    int writeConfidenceFifo;
+
+    std::ofstream outputFile;
 
 
     void warnIfNotLowLatency(oboe::AudioStream *stream);
@@ -51,13 +58,11 @@ private:
 
     const int frameSize = 1024;
     const int hopSize = 512;
+//    const int windowSize = 1024;
+    const int32_t sampleRate = 44100;
 
     essentia::scheduler::Network *network = NULL;
     std::thread audioProcessor;
-
-//    uint framesize = 4096;
-//    uint hopsize = 2048;
-//    uint zeropadding = 0;
 
     void runNetwork();
 

@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        MicrophoneRecording.create()
+        MicrophoneRecording.create("/data/data/com.kjipo.microphoneinput/record_pipe", "/data/data/com.kjipo.microphoneinput/record_pipe_confidence")
     }
 
     override fun onPause() {

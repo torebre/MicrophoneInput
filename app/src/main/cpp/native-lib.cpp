@@ -28,9 +28,10 @@ Java_com_kjipo_microphoneinput_MicrophoneRecording_startRecording(
 
 JNIEXPORT bool JNICALL
 Java_com_kjipo_microphoneinput_MicrophoneRecording_create(
-        JNIEnv *env, jclass) {
+        JNIEnv *env, jclass, jstring pitchFifo, jstring pitchConfidenceFifo) {
     if (engine == nullptr) {
-        engine = new MicrophoneInput();
+        engine = new MicrophoneInput(env->GetStringUTFChars(pitchFifo, nullptr),
+                                     env->GetStringUTFChars(pitchConfidenceFifo, nullptr));
     }
 
     return (engine != nullptr);
@@ -62,8 +63,8 @@ Java_com_kjipo_microphoneinput_MicrophoneRecording_setRecordingDeviceId(
 }
 
 
-
-void Java_com_kjipo_microphoneinput_MicrophoneRecording_initializeEssentia(JNIEnv* env, jclass clazz) {
+void
+Java_com_kjipo_microphoneinput_MicrophoneRecording_initializeEssentia(JNIEnv *env, jclass clazz) {
     // Parameters
     LOGI("C++", "Initializing Essentia");
 
