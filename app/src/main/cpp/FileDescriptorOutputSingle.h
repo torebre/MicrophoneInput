@@ -41,8 +41,7 @@ namespace essentia {
             }
 
             void writeToken(const Real value) {
-
-                LOGI("Got value: %f", value);
+//                LOGI("Got value: %f", value);
 
                 // TODO The bytes are in reversed order when they are written here
                 write(fileDescriptor, (const char *) &value, sizeof(Real));

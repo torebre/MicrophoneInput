@@ -49,6 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="48dp"
             android:layout_marginTop="8dp"
+            android:inputType="none"
             android:text="Pitch"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/txtPitch" />
@@ -60,6 +61,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
+            android:inputType="none"
             android:text="Certainty"
             app:layout_constraintEnd_toStartOf="@+id/txtCertainty"
             app:layout_constraintStart_toStartOf="parent"
@@ -72,10 +74,10 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="48dp"
             android:ems="10"
-            android:inputType="numberDecimal"
+            android:importantForAutofill="no"
+            android:inputType="none"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:importantForAutofill="no" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <EditText
             android:id="@+id/txtCertainty"
@@ -84,7 +86,7 @@
             android:layout_marginTop="24dp"
             android:layout_marginEnd="48dp"
             android:ems="10"
-            android:inputType="numberDecimal"
+            android:inputType="none"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/txtPitch" />
     </android.support.constraint.ConstraintLayout>

@@ -32,6 +32,9 @@ Java_com_kjipo_microphoneinput_MicrophoneRecording_create(
     if (engine == nullptr) {
         engine = new MicrophoneInput(env->GetStringUTFChars(pitchFifo, nullptr),
                                      env->GetStringUTFChars(pitchConfidenceFifo, nullptr));
+
+        LOGI("C++", "Initializing Essentia");
+        essentia::init();
     }
 
     return (engine != nullptr);
@@ -43,9 +46,7 @@ Java_com_kjipo_microphoneinput_MicrophoneRecording_stop(
     if (engine == nullptr) {
         return;
     }
-
     engine->stop();
-
 }
 
 
@@ -62,18 +63,18 @@ Java_com_kjipo_microphoneinput_MicrophoneRecording_setRecordingDeviceId(
     engine->setRecordingDeviceId(deviceId);
 }
 
-
-void
-Java_com_kjipo_microphoneinput_MicrophoneRecording_initializeEssentia(JNIEnv *env, jclass clazz) {
-    // Parameters
-    LOGI("C++", "Initializing Essentia");
-
-    essentia::init();
-
-    essentia::Pool pool;
-
-
-}
+//
+//void
+// Java_com_kjipo_microphoneinput_MicrophoneRecording_initializeEssentia(JNIEnv *env, jclass clazz) {
+//    // Parameters
+//    LOGI("C++", "Initializing Essentia");
+//
+//    essentia::init();
+//
+//    essentia::Pool pool;
+//
+//
+//}
 
 
 }

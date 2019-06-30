@@ -13,7 +13,6 @@ public enum MicrophoneRecording {
     static native void startRecording();
     static native void stop();
     static native void setRecordingDeviceId(int deviceId);
-    static native void initializeEssentia();
 
 
 }

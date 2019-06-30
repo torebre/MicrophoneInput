@@ -25,14 +25,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
-//        pitchPipeFile = applicationContext.filesDir.resolve ("/data/com.kjipo.microphoneinput/record_pipe")
-
-//        Log.i("Test23", "Files dir: ${applicationContext.filesDir}")
-
-        pitchPipeFile = File("/data/data/com.kjipo.microphoneinput/record_pipe")
-        certaintyPipeFile = File("/data/data/com.kjipo.microphoneinput/record_pipe_confidence")
-
+        pitchPipeFile = applicationContext.filesDir.resolve("record_pipe").absoluteFile
+        certaintyPipeFile = applicationContext.filesDir.resolve("record_pipe_confidence").absoluteFile
 
         val recordPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) === PackageManager.PERMISSION_GRANTED;
         if (!recordPermissionGranted) {
@@ -40,7 +34,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupAudioDeviceCallback()
-        MicrophoneRecording.initializeEssentia()
 
         btnStart.setOnClickListener { startRecording() }
         btnStop.setOnClickListener { stopRecording() }
@@ -114,10 +107,7 @@ class MainActivity : AppCompatActivity() {
                 bytes.reverse()
                 val buffer = ByteBuffer.wrap(bytes)
                 val readInt = buffer.int
-
                 val pitchValue = java.lang.Float.intBitsToFloat(readInt)
-                Log.i("Main", "Pitch: ${pitchValue}. Integer: $readInt")
-
 
                 // Read 4 bytes to get a float representing the certainty of the pitch
                 val read2 = certaintyInputStream.read(bytes)
@@ -127,9 +117,7 @@ class MainActivity : AppCompatActivity() {
                 bytes.reverse()
                 val buffer2 = ByteBuffer.wrap(bytes)
                 val readInt2 = buffer2.int
-
                 val certaintyValue = java.lang.Float.intBitsToFloat(readInt2)
-//                Log.i("Main", "Pitch: ${pitchValue}. Integer: $readInt")
 
                 runOnUiThread { txtPitch.setText(NumberFormat.getInstance().format(pitchValue)) }
                 runOnUiThread { txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue)) }
@@ -156,8 +144,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        MicrophoneRecording.create("/data/data/com.kjipo.microphoneinput/record_pipe", "/data/data/com.kjipo.microphoneinput/record_pipe_confidence")
+        MicrophoneRecording.create(pitchPipeFile.absolutePath, certaintyPipeFile.absolutePath)
     }
+
 
     override fun onPause() {
         MicrophoneRecording.stop()

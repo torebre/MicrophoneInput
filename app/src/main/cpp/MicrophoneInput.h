@@ -48,8 +48,6 @@ private:
     int writefd;
     int writeConfidenceFifo;
 
-    std::ofstream outputFile;
-
 
     void warnIfNotLowLatency(oboe::AudioStream *stream);
 
