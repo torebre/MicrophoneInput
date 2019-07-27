@@ -50,6 +50,11 @@ android {
             include 'x86_64' // 'armeabi-v7a', 'mips'
         }
     }
+
+    testOptions {
+        unitTests.includeAndroidResources = true
+    }
+
 }
 
 dependencies {
