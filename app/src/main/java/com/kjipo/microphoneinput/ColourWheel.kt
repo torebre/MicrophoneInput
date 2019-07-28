@@ -6,6 +6,9 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
+import kotlin.math.abs
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context, attributeSet) {
     private val bitmapHeight = 500
@@ -15,16 +18,7 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
 
 
     init {
-
-//        val pixels = IntArray(500, {
-//            801919
-//        })
-
-        val pixels = createBitmapPixels(bitmapHeight, bitmapWidth)
-
-
-
-
+        val pixels = createBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, bitmapHeight, bitmapWidth)
         bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
     }
 
@@ -92,7 +86,7 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
         }
 
 
-        internal fun createBitmapPixels(bitmapHeight: Int, bitmapWidth: Int): IntArray {
+        internal fun createBitmapPixels(centerX: Int, centerY: Int, bitmapHeight: Int, bitmapWidth: Int): IntArray {
             val segmentPixelList = transformMap(drawWheel(bitmapHeight, bitmapWidth))
 
             val rowIterator = segmentPixelList.first.iterator()
@@ -100,11 +94,9 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
             val pixelArray = IntArray(bitmapWidth * bitmapHeight) { 0 }
             val hueChange = 360 / segmentPixelList.first.size
             var hueValue = 0
+            val background = Color.valueOf(0f, 0f, 0f, 0f).toArgb()
 
-            while(rowIterator.hasNext()) {
-//                val colour = Color.valueOf(1.0f, 0.0f, 0.0f, 1f)
-                val argbColour = Color.HSVToColor(255, floatArrayOf(hueValue.toFloat(), 1f, 1f))
-                hueValue += hueChange
+            while (rowIterator.hasNext()) {
 
                 val row = rowIterator.next()
                 val column = columnIterator.next()
@@ -112,12 +104,19 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
                 val xCoordItr = row.iterator()
                 val yCoordItr = column.iterator()
 
+                while (xCoordItr.hasNext()) {
+                    val xCoord = xCoordItr.nextInt()
+                    val yCoord = yCoordItr.nextInt()
+                    val distanceToCenter = sqrt(abs(xCoord - centerX).toDouble().pow(2) + abs(yCoord - centerY).toDouble().pow(2))
 
-
-                while(xCoordItr.hasNext()) {
-
-                    pixelArray[xCoordItr.next() * bitmapWidth + yCoordItr.next()] =  argbColour //801919
+                    // TODO Set proper cutoffs
+                    pixelArray[xCoord * bitmapWidth + yCoord] = if (distanceToCenter > 100 || distanceToCenter < 20) {
+                        background
+                    } else {
+                        Color.HSVToColor(255, floatArrayOf(hueValue.toFloat(), 1f, 1f))
+                    }
                 }
+                hueValue += hueChange
 
             }
 
