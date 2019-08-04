@@ -11,7 +11,7 @@ class ColourWheelTest {
         val segmentPixelData = ColourWheel.transformMap(colourWheel)
 
         println("Rows:")
-        segmentPixelData.first.forEach {rows ->
+        segmentPixelData.first.forEach { rows ->
             println(rows.joinToString(","))
         }
 
@@ -26,14 +26,15 @@ class ColourWheelTest {
     }
 
 
-    @Test
-    fun createBitmapPixelsTest() {
-        val pixels = ColourWheel.createBitmapPixels(200, 200)
-
-        println("Pixels: $pixels")
-
-
-    }
+//    @Test
+//    fun createBitmapPixelsTest() {
+//        val colourWheel = ColourWheel.drawWheel(200, 200)
+//        val segmentPixelData = ColourWheel.transformMap(colourWheel)
+//
+//        val pixels = ColourWheel.createBitmapPixels(200, 200, 400, 400, segmentPixelData, -1)
+//
+//        println("Pixels: $pixels")
+//    }
 
 
 }

@@ -5,12 +5,15 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
-import kotlin.math.abs
-import kotlin.math.pow
-import kotlin.math.sqrt
+import kotlin.math.*
 
 class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context, attributeSet) {
+    private var currentHighlight = -1
+    private var pixels: IntArray? = null
+    private var segmentPixelList: Pair<MutableList<IntArray>, MutableList<IntArray>>
+
     private val bitmapHeight = 500
     private val bitmapWidth = 500
 
@@ -18,15 +21,41 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
 
 
     init {
-        val pixels = createBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, bitmapHeight, bitmapWidth)
-        bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
+        segmentPixelList = transformMap(drawWheel(bitmapHeight, bitmapWidth))
     }
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-
+        setupBitmap()
         canvas?.drawBitmap(bitmap, 0.0.toFloat(), 0.0.toFloat(), null)
+    }
 
+    internal fun updateHighlight(updatedData: Pair<Double, Double>) {
+        if (updatedData.second < 0.9) {
+            currentHighlight = -1
+            setupBitmap()
+            return
+        }
+
+        // TODO Make proper computation
+        val octaves = abs(log2(updatedData.first/440))
+        val decimalPlaces = octaves - floor(octaves)
+        currentHighlight = (decimalPlaces * NUMBER_OF_SEGMENTS).roundToInt()
+
+
+        Log.i("ColourWheel", "Current highlight: $currentHighlight")
+
+        setupBitmap()
+
+        invalidate()
+
+
+    }
+
+
+    private fun setupBitmap() {
+        pixels = createBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, bitmapHeight, bitmapWidth, segmentPixelList, currentHighlight)
+        bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
     }
 
 
@@ -45,7 +74,7 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
                     val xDiff = column - centerX
                     val yDiff = row - centerY
 
-                    var angle = Math.atan2(yDiff.toDouble(), xDiff.toDouble())
+                    var angle = atan2(yDiff.toDouble(), xDiff.toDouble())
                     if (angle < 0) {
                         angle += 2 * Math.PI
                     }
@@ -86,9 +115,7 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
         }
 
 
-        internal fun createBitmapPixels(centerX: Int, centerY: Int, bitmapHeight: Int, bitmapWidth: Int): IntArray {
-            val segmentPixelList = transformMap(drawWheel(bitmapHeight, bitmapWidth))
-
+        internal fun createBitmapPixels(centerX: Int, centerY: Int, bitmapHeight: Int, bitmapWidth: Int, segmentPixelList: Pair<MutableList<IntArray>, MutableList<IntArray>>, currentHighlight: Int): IntArray {
             val rowIterator = segmentPixelList.first.iterator()
             val columnIterator = segmentPixelList.second.iterator()
             val pixelArray = IntArray(bitmapWidth * bitmapHeight) { 0 }
@@ -96,7 +123,14 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
             var hueValue = 0
             val background = Color.valueOf(0f, 0f, 0f, 0f).toArgb()
 
+            var segmentCounter = 0
             while (rowIterator.hasNext()) {
+                val value = if(segmentCounter == currentHighlight) {
+                    1f
+                }
+                else {
+                    0.7f
+                }
 
                 val row = rowIterator.next()
                 val column = columnIterator.next()
@@ -113,7 +147,7 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
                     pixelArray[xCoord * bitmapWidth + yCoord] = if (distanceToCenter > 100 || distanceToCenter < 20) {
                         background
                     } else {
-                        Color.HSVToColor(255, floatArrayOf(hueValue.toFloat(), 1f, 1f))
+                        Color.HSVToColor(255, floatArrayOf(hueValue.toFloat(), 1f, value))
                     }
                 }
                 hueValue += hueChange

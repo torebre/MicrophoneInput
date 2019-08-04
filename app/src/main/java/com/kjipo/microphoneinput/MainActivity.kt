@@ -4,11 +4,16 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import kjipo.com.microphoneinput.R
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
@@ -16,7 +21,10 @@ import java.text.NumberFormat
 
 class MainActivity : AppCompatActivity() {
     private lateinit var audioManager: AudioManager
+    private lateinit var model: ColourWheelModel
     private var selectedInputDevice = 0
+
+    private val mainThreadScope = CoroutineScope(Dispatchers.Main)
 
     private lateinit var pitchPipeFile: File
     private lateinit var certaintyPipeFile: File
@@ -38,6 +46,11 @@ class MainActivity : AppCompatActivity() {
         btnStart.setOnClickListener { startRecording() }
         btnStop.setOnClickListener { stopRecording() }
 
+        model = ViewModelProviders.of(this)[ColourWheelModel::class.java]
+        model.inputData.observe(this, Observer<Pair<Double, Double>> {
+            updatedDate ->
+            viewColourWheel.updateHighlight(updatedDate)
+        })
     }
 
 
@@ -121,6 +134,17 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread { txtPitch.setText(NumberFormat.getInstance().format(pitchValue)) }
                 runOnUiThread { txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue)) }
+
+                runOnUiThread { viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble())) }
+
+
+//                mainThreadScope.launch {
+//                    txtPitch.setText(NumberFormat.getInstance().format(pitchValue))
+//                    txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue))
+//                    model.setCurrentData(Pair(pitchValue.toDouble(), certaintyValue.toDouble()))
+//                }
+
+
             }
 
         }
@@ -152,6 +176,13 @@ class MainActivity : AppCompatActivity() {
         MicrophoneRecording.stop()
         super.onPause()
     }
+
+//    suspend fun updateColourWheel() = withContext(Dispatchers.Main) {
+//
+//        // TODO
+//
+//
+//    }
 
 
 }
