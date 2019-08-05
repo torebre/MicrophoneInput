@@ -18,6 +18,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.text.NumberFormat
+import java.time.Instant
 
 class MainActivity : AppCompatActivity() {
     private lateinit var audioManager: AudioManager
@@ -46,10 +47,17 @@ class MainActivity : AppCompatActivity() {
         btnStart.setOnClickListener { startRecording() }
         btnStop.setOnClickListener { stopRecording() }
 
+        var lastUpdate = System.currentTimeMillis()
+
         model = ViewModelProviders.of(this)[ColourWheelModel::class.java]
         model.inputData.observe(this, Observer<Pair<Double, Double>> {
             updatedDate ->
-            viewColourWheel.updateHighlight(updatedDate)
+            val now = System.currentTimeMillis()
+            if(now - lastUpdate > 2000) {
+                viewColourWheel.updateHighlight(updatedDate)
+                lastUpdate = now
+            }
+
         })
     }
 
@@ -111,6 +119,8 @@ class MainActivity : AppCompatActivity() {
             val pitchInputStream = FileInputStream(pitchPipeFile)
             val certaintyInputStream = FileInputStream(certaintyPipeFile)
 
+            var lastUpdate = System.currentTimeMillis()
+
             while (true) {
                 // Read 4 bytes to get a float representing a pitch value
                 val read = pitchInputStream.read(bytes)
@@ -132,17 +142,29 @@ class MainActivity : AppCompatActivity() {
                 val readInt2 = buffer2.int
                 val certaintyValue = java.lang.Float.intBitsToFloat(readInt2)
 
-                runOnUiThread { txtPitch.setText(NumberFormat.getInstance().format(pitchValue)) }
-                runOnUiThread { txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue)) }
+//                runOnUiThread { txtPitch.setText(NumberFormat.getInstance().format(pitchValue)) }
+//                runOnUiThread { txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue)) }
 
-                runOnUiThread { viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble())) }
+//                runOnUiThread { viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble())) }
+
+                val now = System.currentTimeMillis()
+                if(now - lastUpdate > 1000) {
+                mainThreadScope.launch {
+                    txtPitch.setText(NumberFormat.getInstance().format(pitchValue))
+                    txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue))
 
 
-//                mainThreadScope.launch {
-//                    txtPitch.setText(NumberFormat.getInstance().format(pitchValue))
-//                    txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue))
+
+
+                        viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble()))
+                        lastUpdate = now
+                    }
+
+
+
+
 //                    model.setCurrentData(Pair(pitchValue.toDouble(), certaintyValue.toDouble()))
-//                }
+                }
 
 
             }

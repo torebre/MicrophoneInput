@@ -7,6 +7,12 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
+import android.widget.ImageView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.math.*
 
 class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context, attributeSet) {
@@ -14,10 +20,12 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
     private var pixels: IntArray? = null
     private var segmentPixelList: Pair<MutableList<IntArray>, MutableList<IntArray>>
 
-    private val bitmapHeight = 500
-    private val bitmapWidth = 500
+    private val bitmapHeight = 1000
+    private val bitmapWidth = 1000
 
     private val bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888, true)
+
+    private val coroutineScope = CoroutineScope(Dispatchers.Default)
 
 
     init {
@@ -26,8 +34,9 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
-        setupBitmap()
-        canvas?.drawBitmap(bitmap, 0.0.toFloat(), 0.0.toFloat(), null)
+//        setupBitmap()
+//        canvas?.drawBitmap(bitmap, 0.0.toFloat(), 0.0.toFloat(), null)
+        canvas?.drawBitmap(bitmap, 0f, 0f, null)
     }
 
     internal fun updateHighlight(updatedData: Pair<Double, Double>) {
@@ -45,17 +54,23 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
 
         Log.i("ColourWheel", "Current highlight: $currentHighlight")
 
-        setupBitmap()
+        coroutineScope.launch {
+            val tempPixels = setupBitmap()
+            withContext(Main) {
+                pixels = tempPixels
+                bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
+                invalidate()
 
-        invalidate()
+            }
+        }
 
 
     }
 
 
-    private fun setupBitmap() {
-        pixels = createBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, bitmapHeight, bitmapWidth, segmentPixelList, currentHighlight)
-        bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
+    private fun setupBitmap(): IntArray {
+         return createBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, bitmapHeight, bitmapWidth, segmentPixelList, currentHighlight)
+
     }
 
 
