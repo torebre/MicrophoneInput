@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
 //                runOnUiThread { viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble())) }
 
                 val now = System.currentTimeMillis()
-                if(now - lastUpdate > 1000) {
+                if(now - lastUpdate > 50) {
                 mainThreadScope.launch {
                     txtPitch.setText(NumberFormat.getInstance().format(pitchValue))
                     txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue))
