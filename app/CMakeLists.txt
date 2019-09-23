@@ -5,6 +5,8 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
+#set(CMAKE_VERBOSE_MAKEFILE ON)
+
 set(OBOE_DIR "../../../projects/oboe")
 get_filename_component(SAMPLE_ROOT_DIR
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../../projects/oboe/samples ABSOLUTE)
@@ -15,20 +17,28 @@ get_filename_component(SAMPLE_ROOT_DIR
 # Gradle automatically packages shared libraries with your APK.
 
 add_library( # Sets the name of the library.
-             native-lib
+        native-lib
 
-             # Sets the library as a shared library.
-             SHARED
+        # Sets the library as a shared library.
+        SHARED
 
-             # Provides a relative path to your source file(s).
-             src/main/cpp/native-lib.cpp
+        # Provides a relative path to your source file(s).
+        src/main/cpp/native-lib.cpp
         src/main/cpp/MicrophoneInput.cpp
-        src/main/cpp/FileDescriptorOutputSingle.h)
+        src/main/cpp/FileDescriptorOutputSingle.h
+        src/main/cpp/colourwheel-lib.cpp
+        src/main/cpp/ColourWheel.h
+        src/main/cpp/ColourWheel.cpp)
 
 add_subdirectory(${OBOE_DIR} ./oboe-bin)
 
 include_directories(${OBOE_DIR}/include)
 
+#add_library(colourwheel-lib
+#        SHARED
+#        src/main/cpp/colourwheel-lib.cpp
+#        src/main/cpp/ColourWheel.h
+#        src/main/cpp/ColourWheel.cpp)
 
 
 include_directories(/home/student/workspace/MicrophoneInput/module/lib/x86_64/include/)
@@ -48,11 +58,16 @@ set_target_properties(libessentia
 # completing its build.
 
 find_library( # Sets the name of the path variable.
-              log-lib
+        log-lib
 
-              # Specifies the name of the NDK library that
-              # you want CMake to locate.
-              log )
+        # Specifies the name of the NDK library that
+        # you want CMake to locate.
+        log)
+
+find_library(jnigraphics-lib jnigraphics)
+
+message(ERROR "Test23: ${jnigraphics-lib}")
+message(ERROR "Test24: ${log-lib}")
 
 #target_include_directories( PRIVATE
 #        ${SAMPLE_ROOT_DIR}/debug-utils)
@@ -62,11 +77,13 @@ find_library( # Sets the name of the path variable.
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-                       native-lib
+        native-lib
 
-                       # Links the target library to the log library
-                       # included in the NDK.
-                       ${log-lib}
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib}
+
+        ${jnigraphics-lib}
 
         oboe
         libessentia)
