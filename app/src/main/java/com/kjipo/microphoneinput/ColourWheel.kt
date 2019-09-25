@@ -50,12 +50,10 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
 
         bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
         invalidate()
-    }
 
 
-    private fun setupBitmap(): IntArray {
-        return createBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, bitmapHeight, bitmapWidth, segmentPixelList)
-
+        // TODO Just here for testing
+        ColourWheelRenderer.renderColourWheel(bitmap, 0)
     }
 
 

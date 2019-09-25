@@ -25,20 +25,17 @@ add_library( # Sets the name of the library.
         # Provides a relative path to your source file(s).
         src/main/cpp/native-lib.cpp
         src/main/cpp/MicrophoneInput.cpp
-        src/main/cpp/FileDescriptorOutputSingle.h
-        src/main/cpp/colourwheel-lib.cpp
-        src/main/cpp/ColourWheel.h
-        src/main/cpp/ColourWheel.cpp)
+        src/main/cpp/FileDescriptorOutputSingle.h)
 
 add_subdirectory(${OBOE_DIR} ./oboe-bin)
 
 include_directories(${OBOE_DIR}/include)
 
-#add_library(colourwheel-lib
-#        SHARED
-#        src/main/cpp/colourwheel-lib.cpp
-#        src/main/cpp/ColourWheel.h
-#        src/main/cpp/ColourWheel.cpp)
+add_library(colourwheel-lib
+        SHARED
+        src/main/cpp/colourwheel-lib.cpp
+        src/main/cpp/ColourWheel.h
+        src/main/cpp/ColourWheel.cpp)
 
 
 include_directories(/home/student/workspace/MicrophoneInput/module/lib/x86_64/include/)
@@ -83,8 +80,10 @@ target_link_libraries( # Specifies the target library.
         # included in the NDK.
         ${log-lib}
 
-        ${jnigraphics-lib}
-
         oboe
         libessentia)
+
+target_link_libraries(colourwheel-lib
+        ${log-lib}
+        ${jnigraphics-lib})
 

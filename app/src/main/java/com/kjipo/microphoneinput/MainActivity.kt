@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pitchPipeFile: File
     private lateinit var certaintyPipeFile: File
 
+    private var readPitchThread: Thread? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +61,9 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+        // TODO Set proper number of rows and columns
+        ColourWheelRenderer.setup(100, 100)
     }
 
 
@@ -89,7 +94,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    var readPitchThread: Thread? = null
+
 
 
     private fun startRecording() {
