@@ -15,7 +15,7 @@ extern "C" {
 
 JNIEXPORT void JNICALL
 Java_com_kjipo_microphoneinput_ColourWheelRenderer_setup(JNIEnv *env, jobject obj,
-                                                         jobject bitmap, int numberOfRows,
+                                                         int numberOfRows,
                                                          int numberOfColumns) {
     if (colourWheel == nullptr) {
         colourWheel = new ColourWheel();
@@ -51,10 +51,14 @@ Java_com_kjipo_microphoneinput_ColourWheelRenderer_renderColourWheel(JNIEnv *env
     // TODO
 
 
-    colourWheel->renderColourWheel(&info, &pixels, highlightSegment);
+    colourWheel->renderColourWheel(&info, pixels, highlightSegment);
+
+    LOGI("Test23. Returning");
 
 
     AndroidBitmap_unlockPixels(env, bitmap);
+
+    LOGI("Test23. Returning2");
 
 
 }

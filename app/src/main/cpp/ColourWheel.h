@@ -10,6 +10,9 @@ class ColourWheel {
 
 private:
 
+    static const unsigned int NUMBER_OF_SEGMENTS = 100;
+    static constexpr double HUE_CHANGE = 360.0 / NUMBER_OF_SEGMENTS;
+
     typedef struct {
         int x;
         int y;
@@ -20,12 +23,13 @@ private:
     int currentHighlight = -1;
 
     typedef struct {
-        double h;
-        double s;
-        double v;
+        int h;
+        float s;
+        float v;
     } Hsv;
 
     Hsv *hsvColourLookupTable;
+    uint32_t *colourLookupTable;
 
     Pixel** segmentPixelList;
 
@@ -33,10 +37,21 @@ private:
 
     PixelMap segmentPixelsMap;
 
-    static uint32_t hsv(int hue, float sat, float val);
+    uint32_t *currentPixelArray;
+
+    static uint32_t hsvToArgb(int hue, float sat, float val);
+
+    void createLookupTable();
+
+    uint32_t *createSegmentColours(Hsv *hsvColourTable);
+
+    void createPixelArray(int height, int width);
+
 
 
 public:
+
+    ColourWheel();
 
     ~ColourWheel();
 

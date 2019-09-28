@@ -14,8 +14,8 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
     private var pixels: IntArray
     private var segmentPixelList: Pair<MutableList<IntArray>, MutableList<IntArray>>
 
-    private val bitmapHeight = 1000
-    private val bitmapWidth = 1000
+    private val bitmapHeight = 100
+    private val bitmapWidth = 100
 
     private val bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888, true)
 
@@ -26,13 +26,19 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
     }
 
     override fun onDraw(canvas: Canvas?) {
-        super.onDraw(canvas)
+//        super.onDraw(canvas)
+        ColourWheelRenderer.renderColourWheel(bitmap, currentHighlight)
+
+        Log.i("Test24", "Drawing bitmap")
+
         canvas?.drawBitmap(bitmap, 0f, 0f, null)
+
+
     }
 
     internal fun updateHighlight(updatedData: Pair<Double, Double>) {
         if (updatedData.second < 0.9) {
-            updateBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, pixels, bitmapWidth, segmentPixelList, -1, currentHighlight)
+//            updateBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, pixels, bitmapWidth, segmentPixelList, -1, currentHighlight)
             currentHighlight = -1
 
             return
@@ -44,16 +50,15 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
         val previousHighlight = currentHighlight
         currentHighlight = (decimalPlaces * NUMBER_OF_SEGMENTS).roundToInt() - 1
 
-        updateBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, pixels, bitmapWidth, segmentPixelList, currentHighlight, previousHighlight)
+//        updateBitmapPixels(bitmapWidth / 2, bitmapHeight / 2, pixels, bitmapWidth, segmentPixelList, currentHighlight, previousHighlight)
 
-        Log.i("ColourWheel", "Current highlight: $currentHighlight")
+//        Log.i("ColourWheel", "Current highlight: $currentHighlight")
 
-        bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
+//        bitmap.setPixels(pixels, 0, bitmapWidth, 0, 0, bitmapWidth, bitmapHeight)
         invalidate()
 
 
-        // TODO Just here for testing
-        ColourWheelRenderer.renderColourWheel(bitmap, 0)
+
     }
 
 
