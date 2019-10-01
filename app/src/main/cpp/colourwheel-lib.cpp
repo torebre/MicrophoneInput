@@ -48,19 +48,9 @@ Java_com_kjipo_microphoneinput_ColourWheelRenderer_renderColourWheel(JNIEnv *env
         LOGE("AndroidBitmap_lockPixels() failed ! error=%d", returnCode);
     }
 
-    // TODO
-
-
     colourWheel->renderColourWheel(&info, pixels, highlightSegment);
 
-    LOGI("Test23. Returning");
-
-
     AndroidBitmap_unlockPixels(env, bitmap);
-
-    LOGI("Test23. Returning2");
-
-
 }
 
 

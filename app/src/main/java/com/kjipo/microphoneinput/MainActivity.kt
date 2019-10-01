@@ -63,7 +63,7 @@ class MainActivity : AppCompatActivity() {
         })
 
         // TODO Set proper number of rows and columns
-        ColourWheelRenderer.setup(100, 100)
+        ColourWheelRenderer.setup(1000, 1000)
     }
 
 

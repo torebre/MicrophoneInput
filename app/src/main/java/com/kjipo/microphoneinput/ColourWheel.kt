@@ -14,8 +14,8 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
     private var pixels: IntArray
     private var segmentPixelList: Pair<MutableList<IntArray>, MutableList<IntArray>>
 
-    private val bitmapHeight = 100
-    private val bitmapWidth = 100
+    private val bitmapHeight = 1000
+    private val bitmapWidth = 1000
 
     private val bitmap = Bitmap.createBitmap(bitmapWidth, bitmapHeight, Bitmap.Config.ARGB_8888, true)
 
@@ -28,14 +28,8 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
     override fun onDraw(canvas: Canvas?) {
 //        super.onDraw(canvas)
 
-        Log.i("Test24", "About to render colour wheel")
         ColourWheelRenderer.renderColourWheel(bitmap, currentHighlight)
-
-        Log.i("Test24", "Drawing bitmap")
-
         canvas?.drawBitmap(bitmap, 0f, 0f, null)
-
-
     }
 
     internal fun updateHighlight(updatedData: Pair<Double, Double>) {
