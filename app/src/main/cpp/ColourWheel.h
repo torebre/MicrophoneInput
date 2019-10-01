@@ -47,6 +47,7 @@ private:
 
     void createPixelArray(int height, int width);
 
+    void fillInColourWheel(void *pixels);
 
 
 public:

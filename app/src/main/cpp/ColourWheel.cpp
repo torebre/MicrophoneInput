@@ -104,12 +104,16 @@ void ColourWheel::renderColourWheel(AndroidBitmapInfo *androidBitmapInfo, void *
         setup(androidBitmapInfo->height, androidBitmapInfo->width);
     }
 
-    if (currentHighlight != -1) {
-        auto originalColour = hsvColourLookupTable[segmentToHighlight];
-        auto colour = hsvToArgb(originalColour.h, originalColour.s, originalColour.v);
+    fillInColourWheel(pixels);
 
-        highlightSegmentInternal(currentHighlight, colour, pixels);
-    }
+    // TODO Is it possible to only manipulate the pixels that will change?
+
+//    if (currentHighlight != -1) {
+//        auto originalColour = hsvColourLookupTable[segmentToHighlight];
+//        auto colour = hsvToArgb(originalColour.h, originalColour.s, originalColour.v);
+//
+//        highlightSegmentInternal(currentHighlight, colour, pixels);
+//    }
 
     currentHighlight = segmentToHighlight;
 
@@ -125,9 +129,21 @@ void ColourWheel::renderColourWheel(AndroidBitmapInfo *androidBitmapInfo, void *
 }
 
 
+void ColourWheel::fillInColourWheel(void *pixels) {
+    auto castPixels = (uint32_t *) pixels;
+
+    for (int row = 0; row < numberOfRows; ++row) {
+        for (int column = 0; column < numberOfColumns; ++column) {
+            auto elementIndex = row * numberOfColumns + column;
+            castPixels[elementIndex] = currentPixelArray[elementIndex];
+        }
+    }
+}
+
+
 void ColourWheel::highlightSegmentInternal(int segmentToHighlight, uint32_t colour, void *pixels) {
     auto segment = segmentPixelsMap[segmentToHighlight];
-    uint32_t *castPixels = (uint32_t *) pixels;
+    auto castPixels = (uint32_t *) pixels;
 
     for (auto const iterator : segment) {
         castPixels[iterator.x * numberOfColumns + iterator.y] = colour;
