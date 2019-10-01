@@ -4,7 +4,6 @@
 #include <android/log.h>
 
 
-
 ColourWheel::ColourWheel() {
     createLookupTable();
 }
@@ -17,9 +16,6 @@ ColourWheel::~ColourWheel() {
 
 
 void ColourWheel::setup(int numberOfRows, int numberOfColumns) {
-
-    __android_log_print(ANDROID_LOG_INFO,"Test23", "Setup. Height: %d. Width: %d", numberOfRows, numberOfColumns);
-
     this->numberOfRows = numberOfRows;
     this->numberOfColumns = numberOfColumns;
 
@@ -55,12 +51,8 @@ void ColourWheel::setup(int numberOfRows, int numberOfColumns) {
 }
 
 
-
 void ColourWheel::createPixelArray(int height, int width) {
     auto mapSize = segmentPixelsMap.size();
-
-    __android_log_print(ANDROID_LOG_INFO,"Test23", "Setting up pixel array. Height: %d. Width: %d. Size: %d", height, width, height * width);
-
     currentPixelArray = new uint32_t[height * width];
 
     for (int i = 0; i < height; ++i) {
@@ -76,10 +68,7 @@ void ColourWheel::createPixelArray(int height, int width) {
             currentPixelArray[iterator.x * width + iterator.y] = colour;
         }
     }
-
-//    currentPixelArray = segmentPixelColours;
 }
-
 
 
 void ColourWheel::createLookupTable() {
@@ -92,9 +81,6 @@ void ColourWheel::createLookupTable() {
     }
 
     hsvColourLookupTable = lookupTable;
-
-    __android_log_print(ANDROID_LOG_INFO,"Test23", "Setting up colour lookup table");
-
     colourLookupTable = createSegmentColours(hsvColourLookupTable);
 }
 
@@ -112,10 +98,9 @@ uint32_t *ColourWheel::createSegmentColours(Hsv *hsvColourTable) {
     return argbLookupTable;
 }
 
-void ColourWheel::renderColourWheel(AndroidBitmapInfo* androidBitmapInfo, void* pixels, int segmentToHighlight) {
-    if(androidBitmapInfo->height != numberOfRows || androidBitmapInfo->width != numberOfColumns) {
-        __android_log_print(ANDROID_LOG_INFO,"Test23", "Setting up dimensions. Width: %d. Height: %d", +androidBitmapInfo->width, androidBitmapInfo->height);
-
+void ColourWheel::renderColourWheel(AndroidBitmapInfo *androidBitmapInfo, void *pixels,
+                                    int segmentToHighlight) {
+    if (androidBitmapInfo->height != numberOfRows || androidBitmapInfo->width != numberOfColumns) {
         setup(androidBitmapInfo->height, androidBitmapInfo->width);
     }
 
@@ -123,12 +108,12 @@ void ColourWheel::renderColourWheel(AndroidBitmapInfo* androidBitmapInfo, void* 
         auto originalColour = hsvColourLookupTable[segmentToHighlight];
         auto colour = hsvToArgb(originalColour.h, originalColour.s, originalColour.v);
 
-        highlightSegmentInternal(currentHighlight, colour, &pixels);
+        highlightSegmentInternal(currentHighlight, colour, pixels);
     }
 
     currentHighlight = segmentToHighlight;
 
-    if(currentHighlight == -1) {
+    if (currentHighlight == -1) {
         // Nothing to highlight
         return;
     }
@@ -136,45 +121,21 @@ void ColourWheel::renderColourWheel(AndroidBitmapInfo* androidBitmapInfo, void* 
     auto originalColour = hsvColourLookupTable[segmentToHighlight];
     auto colourToUse = hsvToArgb(originalColour.h, 1.0, originalColour.v);
 
-    __android_log_print(ANDROID_LOG_INFO,"Test23", "Width: %d. Height: %d", +androidBitmapInfo->width, androidBitmapInfo->height);
-
-
-    highlightSegmentInternal(segmentToHighlight, colourToUse, &pixels);
+    highlightSegmentInternal(segmentToHighlight, colourToUse, pixels);
 }
 
 
-
-void ColourWheel::highlightSegmentInternal(int segmentToHighlight, uint32_t colour, void* pixels) {
+void ColourWheel::highlightSegmentInternal(int segmentToHighlight, uint32_t colour, void *pixels) {
     auto segment = segmentPixelsMap[segmentToHighlight];
-    auto castPixels = (uint32_t*)pixels;
-
-
-    int counter = 0;
-
-    __android_log_print(ANDROID_LOG_INFO,"Test23", "Starting");
+    uint32_t *castPixels = (uint32_t *) pixels;
 
     for (auto const iterator : segment) {
-//        currentPixelArray[4 * iterator.x * numberOfColumns + 4 * iterator.y] = colour->r;
-//        currentPixelArray[4 * iterator.x * numberOfColumns + 4 * iterator.y + 1] = colour->g;
-//        currentPixelArray[4 * iterator.x * numberOfColumns + 4 * iterator.y + 2] = colour->b;
-//        currentPixelArray[4 * iterator.x * numberOfColumns + 4 * iterator.y + 3] = colour->a;
-
-
         castPixels[iterator.x * numberOfColumns + iterator.y] = colour;
 
-
-//        __android_log_print(ANDROID_LOG_INFO,"Test23", "x: %d. y: %d. Number of columns: %d", iterator.x, iterator.y, numberOfColumns);
-
-//        castPixels[iterator.x * numberOfColumns + iterator.y] = 0;
-
-
+//        __android_log_print(ANDROID_LOG_INFO, "Test23", "x: %d. y: %d. Number of columns: %d",
+//                            iterator.x, iterator.y, numberOfColumns);
     }
-
-
-    __android_log_print(ANDROID_LOG_INFO,"Test23", "Done");
-
 }
-
 
 
 // hue: 0-360°; sat: 0.f-1.f; val: 0.f-1.f

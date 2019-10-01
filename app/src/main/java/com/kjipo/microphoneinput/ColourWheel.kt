@@ -27,6 +27,8 @@ class ColourWheel(context: Context?, attributeSet: AttributeSet?) : View(context
 
     override fun onDraw(canvas: Canvas?) {
 //        super.onDraw(canvas)
+
+        Log.i("Test24", "About to render colour wheel")
         ColourWheelRenderer.renderColourWheel(bitmap, currentHighlight)
 
         Log.i("Test24", "Drawing bitmap")
