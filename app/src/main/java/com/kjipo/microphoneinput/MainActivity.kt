@@ -18,12 +18,13 @@ import java.io.File
 import java.io.FileInputStream
 import java.nio.ByteBuffer
 import java.text.NumberFormat
-import java.time.Instant
 
 class MainActivity : AppCompatActivity() {
     private lateinit var audioManager: AudioManager
     private lateinit var model: ColourWheelModel
     private var selectedInputDevice = 0
+
+    private var currentlyRecording = false
 
     private val mainThreadScope = CoroutineScope(Dispatchers.Main)
 
@@ -39,23 +40,21 @@ class MainActivity : AppCompatActivity() {
         pitchPipeFile = applicationContext.filesDir.resolve("record_pipe").absoluteFile
         certaintyPipeFile = applicationContext.filesDir.resolve("record_pipe_confidence").absoluteFile
 
-        val recordPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) === PackageManager.PERMISSION_GRANTED;
+        val recordPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
         if (!recordPermissionGranted) {
             requestRecordPermission()
         }
 
         setupAudioDeviceCallback()
 
-        btnStart.setOnClickListener { startRecording() }
-        btnStop.setOnClickListener { stopRecording() }
+        btnRecord.setOnClickListener { record() }
 
         var lastUpdate = System.currentTimeMillis()
 
         model = ViewModelProviders.of(this)[ColourWheelModel::class.java]
-        model.inputData.observe(this, Observer<Pair<Double, Double>> {
-            updatedDate ->
+        model.inputData.observe(this, Observer<Pair<Double, Double>> { updatedDate ->
             val now = System.currentTimeMillis()
-            if(now - lastUpdate > 2000) {
+            if (now - lastUpdate > 2000) {
                 viewColourWheel.updateHighlight(updatedDate)
                 lastUpdate = now
             }
@@ -94,16 +93,18 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
-
+    private fun record() {
+        if (currentlyRecording) {
+            stopRecording()
+            btnRecord.text = resources.getString(R.string.start_recording)
+        } else {
+            startRecording()
+            btnRecord.text = resources.getString(R.string.stop_recording)
+        }
+        currentlyRecording != currentlyRecording
+    }
 
     private fun startRecording() {
-        val recordPermissionGranted = ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) === PackageManager.PERMISSION_GRANTED
-        if (!recordPermissionGranted) {
-            requestRecordPermission()
-            return
-        }
-
         MicrophoneRecording.startRecording()
 
         val pipeFile = File(pitchPipeFile.absolutePath)
@@ -153,10 +154,10 @@ class MainActivity : AppCompatActivity() {
 //                runOnUiThread { viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble())) }
 
                 val now = System.currentTimeMillis()
-                if(now - lastUpdate > 50) {
-                mainThreadScope.launch {
-                    txtPitch.setText(NumberFormat.getInstance().format(pitchValue))
-                    txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue))
+                if (now - lastUpdate > 50) {
+                    mainThreadScope.launch {
+                        txtPitch.setText(NumberFormat.getInstance().format(pitchValue))
+                        txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue))
 
 
 
@@ -164,8 +165,6 @@ class MainActivity : AppCompatActivity() {
                         viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble()))
                         lastUpdate = now
                     }
-
-
 
 
 //                    model.setCurrentData(Pair(pitchValue.toDouble(), certaintyValue.toDouble()))
