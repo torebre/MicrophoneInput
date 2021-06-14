@@ -1,0 +1,8 @@
+//
+// Created by student on 14.06.2021.
+//
+
+#ifndef MICROPHONEINPUT_RECORDER_H
+#define MICROPHONEINPUT_RECORDER_H
+
+#endif //MICROPHONEINPUT_RECORDER_H

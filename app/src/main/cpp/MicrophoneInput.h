@@ -56,7 +56,6 @@ private:
 
     const int frameSize = 1024;
     const int hopSize = 512;
-//    const int windowSize = 1024;
     const int32_t sampleRate = 44100;
 
     essentia::scheduler::Network *network = NULL;

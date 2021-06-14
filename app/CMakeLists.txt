@@ -32,10 +32,23 @@ add_subdirectory(${OBOE_DIR} ./oboe-bin)
 include_directories(${OBOE_DIR}/include)
 
 add_library(colourwheel-lib
+
         SHARED
+
         src/main/cpp/colourwheel-lib.cpp
         src/main/cpp/ColourWheel.h
         src/main/cpp/ColourWheel.cpp)
+
+add_library(mfcc-lib
+
+        SHARED
+
+        src/main/cpp/mfcc-lib.cpp
+        src/main/cpp/MfccAnalysis.h
+        src/main/cpp/MfccAnalysis.cpp
+        src/main/cpp/FileDescriptorVectorOutput.cpp
+        src/main/cpp/Recorder.h
+        src/main/cpp/Recorder.cpp)
 
 
 include_directories(/home/student/workspace/MicrophoneInput/module/lib/x86_64/include/)
@@ -87,3 +100,7 @@ target_link_libraries(colourwheel-lib
         ${log-lib}
         ${jnigraphics-lib})
 
+target_link_libraries(mfcc-lib
+        ${log-lib}
+        oboe
+        libessentia)
