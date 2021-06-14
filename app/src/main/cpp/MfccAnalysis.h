@@ -7,7 +7,7 @@
 #include <oboe/AudioStreamCallback.h>
 
 
-class MfccAnalysis : public oboe::AudioStreamCallback {
+class MfccAnalysis {
 
 public:
     MfccAnalysis(const int writefd);
@@ -15,6 +15,7 @@ public:
     void setupNetwork();
 
 //    void startRecording();
+
 
 
 private:

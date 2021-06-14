@@ -7,6 +7,6 @@ class MfccActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_mfcc)
+//        setContentView(R.layout.activity_mfcc)
     }
 }
