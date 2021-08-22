@@ -1,5 +1,6 @@
 package com.kjipo.microphoneinput
 
+import com.kjipo.microphoneinput.colourwheel.ColourWheel
 import org.junit.Test
 
 class ColourWheelTest {

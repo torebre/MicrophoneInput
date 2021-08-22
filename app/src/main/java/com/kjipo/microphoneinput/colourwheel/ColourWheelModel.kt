@@ -1,4 +1,4 @@
-package com.kjipo.microphoneinput
+package com.kjipo.microphoneinput.colourwheel
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel

@@ -5,26 +5,62 @@
 
 #include "../../../../../../projects/oboe/src/common/OboeDebug.h"
 #include "MicrophoneInput.h"
+#include "MfccAnalysis.h"
 
 
-static MicrophoneInput *engine = nullptr;
+static MfccAnalysis *mfccAnalysis = nullptr;
 
 extern "C" {
 
+JNIEXPORT jboolean JNICALL
+Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_create(
+        JNIEnv *env, jclass) {
+    if (mfccAnalysis == nullptr) {
+
+        LOGI("C++", "Initializing Essentia");
+        essentia::init();
+
+        mfccAnalysis = new MfccAnalysis(env);
+    }
+
+    return (mfccAnalysis != nullptr);
+}
+
 
 JNIEXPORT void JNICALL
-Java_com_kjipo_microphoneinput_MicrophoneRecording_startRecording(
-        JNIEnv * env , jclass ) {
-if ( engine == nullptr ) {
-LOGE(
-        "Engine is null, you must call createEngine before calling this "
-        "method") ;
-return ;
+Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_start(
+        JNIEnv *env, jclass) {
+    if (mfccAnalysis == nullptr) {
+        LOGE("C++", "Essentia engine not started");
+    }
+
+
+    mfccAnalysis->create();
+    mfccAnalysis->startRecording();
+
 }
 
-engine->startRecording();
+JNIEXPORT void JNICALL
+Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_stop(
+        JNIEnv *env, jclass) {
+
+    // TODO
+
 
 }
 
+
+JNIEXPORT void JNICALL
+Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_testCallback(
+        JNIEnv *env, jclass) {
+    jclass clazz = env->FindClass(("com/kjipo/microphoneinput/mfcc/DataTransfer"));
+    jmethodID methodId = env->GetStaticMethodID(clazz, "storeFloat", "(F)V");
+
+    if (methodId == NULL) {
+        LOGE("C++", "Method not found");
+    } else {
+        env->CallStaticVoidMethod(clazz, methodId, (float)4.0);
+    }
+}
 
 }

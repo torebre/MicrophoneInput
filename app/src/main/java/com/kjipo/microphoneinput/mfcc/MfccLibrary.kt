@@ -1,14 +1,27 @@
 package com.kjipo.microphoneinput.mfcc
 
-object MfccLibrary {
+class MfccLibrary {
 
 
-    init {
-        System.loadLibrary("mfcc-lib")
+
+    companion object {
+
+        @JvmStatic
+        external fun create(): Boolean
+
+        @JvmStatic
+        external fun start()
+
+        @JvmStatic
+        external fun stop()
+
+        @JvmStatic
+        external fun testCallback()
+
+        init {
+            System.loadLibrary("mfcc-lib")
+        }
     }
-
-
-//    external fun setup(numberOfRows: Int, numberOfColumns: Int)
 
 
 }

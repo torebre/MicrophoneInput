@@ -48,7 +48,9 @@ add_library(mfcc-lib
         src/main/cpp/MfccAnalysis.cpp
         src/main/cpp/FileDescriptorVectorOutput.cpp
         src/main/cpp/Recorder.h
-        src/main/cpp/Recorder.cpp)
+        src/main/cpp/Recorder.cpp
+        src/main/cpp/CallbackWriter.h
+        src/main/cpp/CallbackWriter.cpp)
 
 
 include_directories(/home/student/workspace/MicrophoneInput/module/lib/x86_64/include/)
