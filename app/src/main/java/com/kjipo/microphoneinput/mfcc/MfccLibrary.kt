@@ -16,7 +16,11 @@ class MfccLibrary {
         external fun stop()
 
         @JvmStatic
+        external fun setRecordingDeviceId(deviceId: Int)
+
+        @JvmStatic
         external fun testCallback()
+
 
         init {
             System.loadLibrary("mfcc-lib")

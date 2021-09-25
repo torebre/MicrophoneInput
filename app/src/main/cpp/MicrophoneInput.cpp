@@ -66,15 +66,15 @@ void MicrophoneInput::startRecording() {
 
     AudioStreamBuilder builder;
 
-    builder.setDeviceId(recordingDeviceId);
-    builder.setDirection(oboe::Direction::Input);
-    builder.setSampleRate(sampleRate);
-    builder.setChannelCount(inputChannelCount);
-    builder.setAudioApi(audioApi);
-    builder.setFormat(format);
-    builder.setSharingMode(oboe::SharingMode::Exclusive);
-    builder.setPerformanceMode(oboe::PerformanceMode::LowLatency);
-    builder.setCallback(this);
+    builder.setDeviceId(recordingDeviceId)
+            ->setDirection(oboe::Direction::Input)
+            ->setSampleRate(sampleRate)
+            ->setChannelCount(inputChannelCount)
+            ->setAudioApi(audioApi)
+            ->setFormat(format)
+            ->setSharingMode(oboe::SharingMode::Exclusive)
+            ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
+            ->setCallback(this);
 
     oboe::Result result = builder.openStream(&recordingStream);
 

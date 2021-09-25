@@ -19,12 +19,18 @@ public:
 
     oboe::DataCallbackResult onAudioReady(oboe::AudioStream *oboeStream,
                                           void *audioData, int32_t numFrames);
+
     void onErrorBeforeClose(oboe::AudioStream *oboeStream, oboe::Result error);
+
     void onErrorAfterClose(oboe::AudioStream *oboeStream, oboe::Result error);
 
     void setupNetwork();
+
     void runNetwork();
+
     void startRecording();
+
+    void setRecordingDeviceId(int32_t deviceId);
 
 
 private:
@@ -48,7 +54,6 @@ private:
     essentia::scheduler::Network *network = NULL;
     std::thread audioProcessor;
 
-    void setRecordingDeviceId(int32_t deviceId);
 };
 
 

@@ -29,6 +29,8 @@ MfccAnalysis::MfccAnalysis(JNIEnv *env) {
 }
 
 void MfccAnalysis::create() {
+    LOGI("Setting up MfccAnalysis");
+
     AudioStreamBuilder builder;
     builder.setDirection(Direction::Input);
     builder.setPerformanceMode(PerformanceMode::LowLatency);
@@ -63,6 +65,8 @@ void MfccAnalysis::startRecording() {
     ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
     ->setCallback(this);
 
+    LOGI("Builder set up");
+
     oboe::Result result = builder.openStream(&recordingStream);
 
     if (result == oboe::Result::OK && recordingStream) {
@@ -76,8 +80,9 @@ void MfccAnalysis::startRecording() {
         network = new essentia::scheduler::Network(gen);
 
 
+        // TODO Comment back in
 // TODO Is it necessary to run this here?
-        audioProcessor = std::thread(&MfccAnalysis::runNetwork, this);
+//        audioProcessor = std::thread(&MfccAnalysis::runNetwork, this);
 
         recordingStream->requestStart();
     } else {
@@ -109,9 +114,11 @@ void MfccAnalysis::warnIfNotLowLatency(oboe::AudioStream *stream) {
 }
 
 void MfccAnalysis::setupNetwork() {
+    LOGI("Setting up network");
+
     essentia::streaming::AlgorithmFactory &factory = essentia::streaming::AlgorithmFactory::instance();
 
-    auto gen = new essentia::streaming::RingBufferInput();
+    gen = new essentia::streaming::RingBufferInput();
     gen->declareParameters();
     gen->configure();
 
@@ -124,13 +131,20 @@ void MfccAnalysis::setupNetwork() {
                                                         "startFromZero", true);
     essentia::streaming::Algorithm *w = factory.create("Windowing",
                                                        "type", "blackmanharris62");
+
     essentia::streaming::Algorithm *spec = factory.create("Spectrum");
     essentia::streaming::Algorithm *mfcc = factory.create("MFCC");
 
-
+    gen->output("signal") >> fc->input("signal");
+    fc->output("frame") >> w->input("frame");
+    w->output("frame") >> spec->input("frame");
     spec->output("spectrum") >> mfcc->input("spectrum");
-    mfcc->output("bands")
-            >> essentia::streaming::NOWHERE;
+
+    // TODO Connect the outputs to a callback
+    mfcc->output("bands") >> essentia::streaming::NOWHERE;
+    mfcc->output("mfcc") >> essentia::streaming::NOWHERE;
+
+    LOGI("Finished setting up network");
 
 // TODO Write to a buffer
 
@@ -151,12 +165,14 @@ oboe::DataCallbackResult MfccAnalysis::onAudioReady(
 
 //    const int samplesToRead = inputChannelCount * numFrames * oboeStream->getBytesPerFrame();
     const int samplesToRead = numFrames; //inputChannelCount * numFrames * oboeStream->getBytesPerFrame();
-//    LOGI("DATA VALUE FOUND %d", (int) sizeof(uint8_t) * samplesToRead);
+
+    LOGI("DATA VALUE FOUND %d", (int) sizeof(uint8_t) * samplesToRead);
 
 //    auto *castAudioData = static_cast<uint8_t *>(audioData);
     auto *castAudioData = static_cast<float *>(audioData);
 
-    gen->add(&castAudioData[0], samplesToRead);
+    // TODO Comment back in
+//    gen->add(&castAudioData[0], samplesToRead);
 
     return oboe::DataCallbackResult::Continue;
 }

@@ -2,11 +2,11 @@ package com.kjipo.microphoneinput.mfcc
 
 import android.media.AudioManager
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.kjipo.microphoneinput.MicrophoneRecording
 import com.kjipo.microphoneinput.colourwheel.ColourWheelModel
 import kjipo.com.microphoneinput.R
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.activity_mfcc.*
 
 class MfccActivity : AppCompatActivity() {
@@ -16,8 +16,6 @@ class MfccActivity : AppCompatActivity() {
     private var currentlyRecording = false
 
 
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mfcc)
@@ -25,17 +23,15 @@ class MfccActivity : AppCompatActivity() {
 //        setupAudioDeviceCallback()
 
         // TODO Does this mean auto-select?
-        MicrophoneRecording.setRecordingDeviceId(0)
-
+        MfccLibrary.setRecordingDeviceId(0)
         MfccLibrary.create()
 
         btnMfccStart.setOnClickListener {
 //            MfccLibrary.testCallback()
-            record() }
+            record()
+        }
 
     }
-
-
 
 
     private fun setupAudioDeviceCallback() {
@@ -66,25 +62,16 @@ class MfccActivity : AppCompatActivity() {
 
 
     private fun record() {
-        if (currentlyRecording) {
-           MfccLibrary.start()
-            btnMfccStart.text = resources.getString(R.string.start_mfcc)
-        } else {
-            MfccLibrary.stop()
+        if (!currentlyRecording) {
+            Log.i("MfccActivity", "Starting recording")
+            MfccLibrary.start()
             btnMfccStart.text = resources.getString(R.string.stop_mfcc)
+        } else {
+            Log.i("MfccActivity", "Stopping recording")
+            MfccLibrary.stop()
+            btnMfccStart.text = resources.getString(R.string.start_mfcc)
         }
         currentlyRecording != currentlyRecording
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // TODO
-    }
-
-
-    override fun onPause() {
-//        MicrophoneRecording.stop()
-        super.onPause()
     }
 
 

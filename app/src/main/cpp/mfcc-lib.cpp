@@ -27,17 +27,29 @@ Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_create(
 }
 
 
+
+JNIEXPORT void JNICALL
+Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_setRecordingDeviceId(
+        JNIEnv *env, jclass, jint deviceId) {
+    if (mfccAnalysis == nullptr) {
+        LOGE("MfccAnalysis not created");
+        return;
+    }
+
+    mfccAnalysis->setRecordingDeviceId(deviceId);
+}
+
+
 JNIEXPORT void JNICALL
 Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_start(
         JNIEnv *env, jclass) {
+    LOGI("Calling Mfcc start");
+
     if (mfccAnalysis == nullptr) {
-        LOGE("C++", "Essentia engine not started");
+        LOGE("MfccAnalysis not created");
     }
 
-
-    mfccAnalysis->create();
     mfccAnalysis->startRecording();
-
 }
 
 JNIEXPORT void JNICALL

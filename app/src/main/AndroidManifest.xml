@@ -21,13 +21,7 @@
         <activity
             android:name="com.kjipo.microphoneinput.colourwheel.ColourWheelActivity"
             android:exported="true"
-            android:label="@string/title_activity_colour_wheel"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name="com.kjipo.microphoneinput.colourwheel.ColourWheelActicity"
-            android:exported="true"
-            android:label="@string/title_activity_colour_wheel_acticity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:label="@string/title_activity_colour_wheel" />
         <activity android:name="com.kjipo.microphoneinput.mfcc.MfccActivity" />
         <activity android:name="com.kjipo.microphoneinput.MainActivity">
             <intent-filter>

@@ -32,13 +32,13 @@ class ColourWheelActivity : AppCompatActivity() {
     private var readPitchThread: Thread? = null
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_colour_wheel2)
 
         pitchPipeFile = applicationContext.filesDir.resolve("record_pipe").absoluteFile
-        certaintyPipeFile = applicationContext.filesDir.resolve("record_pipe_confidence").absoluteFile
+        certaintyPipeFile =
+            applicationContext.filesDir.resolve("record_pipe_confidence").absoluteFile
 
         setupAudioDeviceCallback()
 
@@ -60,10 +60,7 @@ class ColourWheelActivity : AppCompatActivity() {
         ColourWheelRenderer.setup(1000, 1000)
 
 
-
     }
-
-
 
 
     private fun setupAudioDeviceCallback() {
@@ -154,7 +151,12 @@ class ColourWheelActivity : AppCompatActivity() {
                         txtPitch.setText(NumberFormat.getInstance().format(pitchValue))
                         txtCertainty.setText(NumberFormat.getInstance().format(certaintyValue))
 
-                        viewColourWheel.updateHighlight(Pair(pitchValue.toDouble(), certaintyValue.toDouble()))
+                        viewColourWheel.updateHighlight(
+                            Pair(
+                                pitchValue.toDouble(),
+                                certaintyValue.toDouble()
+                            )
+                        )
                         lastUpdate = now
                     }
 
@@ -175,7 +177,6 @@ class ColourWheelActivity : AppCompatActivity() {
         readPitchThread = null
         MicrophoneRecording.stop()
     }
-
 
 
     override fun onResume() {
