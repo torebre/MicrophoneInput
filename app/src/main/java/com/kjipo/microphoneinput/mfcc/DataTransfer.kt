@@ -15,6 +15,12 @@ class DataTransfer {
             Log.i("DataTransfer", "Value is: ${DataTransfer.value}")
         }
 
+
+        @JvmStatic
+        fun storeFloatArray(value: FloatArray) {
+            Log.i("DataTransfer", "Storing float array. Number of values: ${value.size}")
+        }
+
     }
 
 }

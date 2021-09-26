@@ -17,28 +17,27 @@ extern "C" {
 JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *) {
     javaVm = vm;
 
-    JNIEnv* env;
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
+    JNIEnv *env;
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
         return JNI_ERR;
     }
-
-    auto tempClass = env->FindClass(("com/kjipo/microphoneinput/mfcc/DataTransfer"));
-    dataTransferClass = (jclass)env->NewGlobalRef(tempClass);
-
-
-
-//    if (c == nullptr) return JNI_ERR;
-
-//    static const JNINativeMethod methods[] = {
-//            {"nativeFoo", "()V", reinterpret_cast<void*>(nativeFoo)},
-//            {"nativeBar", "(Ljava/lang/String;I)Z", reinterpret_cast<void*>(nativeBar)},
-//    };
-//    int rc = env->RegisterNatives(c, methods, sizeof(methods)/sizeof(JNINativeMethod));
-//    if (rc != JNI_OK) return rc;
-
+    dataTransferClass = (jclass) env->NewGlobalRef(
+            env->FindClass(("com/kjipo/microphoneinput/mfcc/DataTransfer")));
 
     return JNI_VERSION_1_6;
 }
+
+JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *) {
+    javaVm = vm;
+
+    JNIEnv *env;
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        LOGE("Could not get environment");
+    } else {
+        env->DeleteGlobalRef(dataTransferClass);
+    }
+}
+
 
 JNIEXPORT jboolean JNICALL
 Java_com_kjipo_microphoneinput_mfcc_MfccLibrary_create(

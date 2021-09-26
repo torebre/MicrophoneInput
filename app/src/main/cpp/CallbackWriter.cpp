@@ -63,7 +63,7 @@ essentia::streaming::AlgorithmStatus CallbackWriter::process() {
 }
 
 void CallbackWriter::writeToken(const std::vector<essentia::Real> value) {
-    LOGI("Got value: %lu", value.size());
+//    LOGI("Got value: %lu", value.size());
 
     if (dataTransferClass == nullptr) {
         LOGE("Class not found");
@@ -77,6 +77,7 @@ void CallbackWriter::writeToken(const std::vector<essentia::Real> value) {
         LOGI("Method found");
     }
 
+    auto numberOfValues = value.size();
 
     // TODO The bytes are in reversed order when they are written here
 //                write(fileDescriptor, (const char *) &value, sizeof(Real));
@@ -86,11 +87,22 @@ void CallbackWriter::writeToken(const std::vector<essentia::Real> value) {
                                                     JNI_VERSION_1_6);
     jvm->AttachCurrentThread(&env, nullptr);
 
-    auto methodId = env->GetStaticMethodID(*dataTransferClass, "storeFloat", "(F)V");
+//    auto methodId = env->GetStaticMethodID(*dataTransferClass, "storeFloat", "(F)V");
+    auto methodId = env->GetStaticMethodID(*dataTransferClass, "storeFloatArray", "([F)V");
+
+    jfloatArray convertedValues = env->NewFloatArray(numberOfValues);
+    jfloat tempValues[numberOfValues];
+
+    for(int i = 0; i < numberOfValues; ++i) {
+        tempValues[i] = value[i];
+    }
+
+    env->SetFloatArrayRegion(convertedValues, 0, numberOfValues, tempValues);
+
 
 // TODO For now just trying to call method and see if value is passed
-    env->CallStaticVoidMethod(*dataTransferClass, methodId, 5.0f); //(float)value.at(0));
+//    env->CallStaticVoidMethod(*dataTransferClass, methodId, 5.0f); //(float)value.at(0));
 
-
+    env->CallStaticVoidMethod(*dataTransferClass, methodId, convertedValues);
 
 }
