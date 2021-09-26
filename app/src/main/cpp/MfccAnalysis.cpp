@@ -22,10 +22,9 @@
 using namespace oboe;
 
 
-MfccAnalysis::MfccAnalysis(JNIEnv *env) {
-    this->env = env;
-
-    setupNetwork();
+MfccAnalysis::MfccAnalysis(JavaVM* jvm, jclass *dataTransferClass) {
+    this->jvm = jvm;
+    this->dataTransferClass = dataTransferClass;
 }
 
 void MfccAnalysis::create() {
@@ -56,14 +55,14 @@ void MfccAnalysis::startRecording() {
     AudioStreamBuilder builder;
 
     builder.setDeviceId(recordingDeviceId)
-    ->setDirection(oboe::Direction::Input)
-    ->setSampleRate(sampleRate)
-    ->setChannelCount(inputChannelCount)
-    ->setAudioApi(audioApi)
-    ->setFormat(format)
-    ->setSharingMode(oboe::SharingMode::Exclusive)
-    ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
-    ->setCallback(this);
+            ->setDirection(oboe::Direction::Input)
+            ->setSampleRate(sampleRate)
+            ->setChannelCount(inputChannelCount)
+            ->setAudioApi(audioApi)
+            ->setFormat(format)
+            ->setSharingMode(oboe::SharingMode::Exclusive)
+            ->setPerformanceMode(oboe::PerformanceMode::LowLatency)
+            ->setCallback(this);
 
     LOGI("Builder set up");
 
@@ -76,24 +75,22 @@ void MfccAnalysis::startRecording() {
 
         warnIfNotLowLatency(recordingStream);
 
-        setupNetwork();
-        network = new essentia::scheduler::Network(gen);
 
-
-        // TODO Comment back in
 // TODO Is it necessary to run this here?
-//        audioProcessor = std::thread(&MfccAnalysis::runNetwork, this);
+        audioProcessor = std::thread(&MfccAnalysis::setupAndRunNetwork, this);
 
         recordingStream->requestStart();
     } else {
         LOGE("Failed to create recording stream. Error: %s",
              oboe::convertToText(result));
     }
-
 }
 
 
-void MfccAnalysis::runNetwork() {
+void MfccAnalysis::setupAndRunNetwork() {
+    setupNetwork();
+    network = new essentia::scheduler::Network(gen);
+
     LOGI("Running network");
     network->run();
     LOGI("Network stopped");
@@ -135,28 +132,18 @@ void MfccAnalysis::setupNetwork() {
     essentia::streaming::Algorithm *spec = factory.create("Spectrum");
     essentia::streaming::Algorithm *mfcc = factory.create("MFCC");
 
+    auto *outputWriter = new CallbackWriter(jvm, dataTransferClass);
+
     gen->output("signal") >> fc->input("signal");
     fc->output("frame") >> w->input("frame");
     w->output("frame") >> spec->input("frame");
     spec->output("spectrum") >> mfcc->input("spectrum");
-
-    // TODO Connect the outputs to a callback
     mfcc->output("bands") >> essentia::streaming::NOWHERE;
-    mfcc->output("mfcc") >> essentia::streaming::NOWHERE;
+
+    essentia::streaming::connect(mfcc->output("mfcc"), outputWriter->input("input"));
 
     LOGI("Finished setting up network");
-
-// TODO Write to a buffer
-
-//    auto *outputWriter = new essentia::streaming::FileDescriptorVectorOutput(writefd);
-
-//auto *outputWriter = new essentia::streaming::CallbackWriter(env);
-
-//    essentia::streaming::connect(mfcc->output("mfcc"), outputWriter->input("data"));
-
 }
-
-
 
 
 oboe::DataCallbackResult MfccAnalysis::onAudioReady(
@@ -166,13 +153,12 @@ oboe::DataCallbackResult MfccAnalysis::onAudioReady(
 //    const int samplesToRead = inputChannelCount * numFrames * oboeStream->getBytesPerFrame();
     const int samplesToRead = numFrames; //inputChannelCount * numFrames * oboeStream->getBytesPerFrame();
 
-    LOGI("DATA VALUE FOUND %d", (int) sizeof(uint8_t) * samplesToRead);
+//    LOGI("DATA VALUE FOUND %d", (int) sizeof(uint8_t) * samplesToRead);
 
 //    auto *castAudioData = static_cast<uint8_t *>(audioData);
     auto *castAudioData = static_cast<float *>(audioData);
 
-    // TODO Comment back in
-//    gen->add(&castAudioData[0], samplesToRead);
+    gen->add(&castAudioData[0], samplesToRead);
 
     return oboe::DataCallbackResult::Continue;
 }
@@ -184,7 +170,7 @@ oboe::DataCallbackResult MfccAnalysis::onAudioReady(
  * @param error: oboe's reason for closing the stream
  */
 void MfccAnalysis::onErrorBeforeClose(oboe::AudioStream *oboeStream,
-                                         oboe::Result error) {
+                                      oboe::Result error) {
     LOGE("%s stream Error before close: %s",
          oboe::convertToText(oboeStream->getDirection()),
          oboe::convertToText(error));
@@ -197,8 +183,22 @@ void MfccAnalysis::onErrorBeforeClose(oboe::AudioStream *oboeStream,
  * @param error
  */
 void MfccAnalysis::onErrorAfterClose(oboe::AudioStream *oboeStream,
-                                        oboe::Result error) {
+                                     oboe::Result error) {
     LOGE("%s stream Error after close: %s",
          oboe::convertToText(oboeStream->getDirection()),
          oboe::convertToText(error));
+}
+
+void MfccAnalysis::stop() {
+    LOGI("Stop called");
+
+    if (recordingStream) {
+        Result result = recordingStream->stop(0L);
+        if (result != oboe::Result::OK) {
+            LOGE("Error when stopping stream. %s", oboe::convertToText(result));
+        }
+    }
+
+    network->clear();
+    essentia::shutdown();
 }

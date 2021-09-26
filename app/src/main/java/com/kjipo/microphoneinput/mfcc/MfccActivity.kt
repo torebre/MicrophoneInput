@@ -27,7 +27,7 @@ class MfccActivity : AppCompatActivity() {
         MfccLibrary.create()
 
         btnMfccStart.setOnClickListener {
-//            MfccLibrary.testCallback()
+            MfccLibrary.testCallback()
             record()
         }
 

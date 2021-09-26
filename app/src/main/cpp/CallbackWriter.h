@@ -5,34 +5,34 @@
 #include <jni.h>
 #include "../../../../module/lib/x86_64/include/essentia/streaming/streamingalgorithm.h"
 
-//namespace essentia {
-//    namespace streaming {
 
 class CallbackWriter : public essentia::streaming::Algorithm {
 
 
 public:
-    CallbackWriter(JNIEnv *env);
+    CallbackWriter(JavaVM *jvm, jclass* dataTransferClass);
 
 
 protected:
-    essentia::streaming::Sink <std::vector<essentia::Real>> _data;
+    essentia::streaming::Sink<std::vector<essentia::Real>> _data;
 
 private:
-    JNIEnv *env;
-
-    jclass clazz;
     jmethodID methodId;
+
+    JavaVM *jvm;
+
+//    JNIEnv *env;
 
     void writeToken(const std::vector<essentia::Real> value);
 
     essentia::streaming::AlgorithmStatus process();
 
     void declareParameters();
-};
 
-//    }
-//}
+//    bool attachToVmIfNecessary(JavaVM *jvm);
+
+    jclass* dataTransferClass;
+};
 
 
 #endif //MICROPHONEINPUT_CALLBACKWRITER_H

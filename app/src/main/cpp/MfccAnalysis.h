@@ -13,7 +13,7 @@
 class MfccAnalysis : public oboe::AudioStreamCallback {
 
 public:
-    MfccAnalysis(JNIEnv *env);
+    MfccAnalysis(JavaVM* jvm, jclass* dataTransferClass);
 
     void create();
 
@@ -26,11 +26,13 @@ public:
 
     void setupNetwork();
 
-    void runNetwork();
+    void setupAndRunNetwork();
 
     void startRecording();
 
     void setRecordingDeviceId(int32_t deviceId);
+
+    void stop();
 
 
 private:
@@ -45,7 +47,7 @@ private:
     essentia::streaming::RingBufferInput *gen;
     essentia::Pool pool;
 
-    JNIEnv *env;
+    JavaVM* jvm;
 
     const int frameSize = 1024;
     const int hopSize = 512;
@@ -54,6 +56,7 @@ private:
     essentia::scheduler::Network *network = NULL;
     std::thread audioProcessor;
 
+    jclass* dataTransferClass;
 };
 
 
