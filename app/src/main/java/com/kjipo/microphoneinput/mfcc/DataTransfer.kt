@@ -1,12 +1,15 @@
 package com.kjipo.microphoneinput.mfcc
 
 import android.util.Log
+import kotlinx.coroutines.*
+
 
 class DataTransfer {
 
     companion object {
 
         var value = 1f
+
 
         @JvmStatic
         fun storeFloat(value: Float) {
@@ -15,10 +18,14 @@ class DataTransfer {
             Log.i("DataTransfer", "Value is: ${DataTransfer.value}")
         }
 
-
         @JvmStatic
-        fun storeFloatArray(value: FloatArray) {
-            Log.i("DataTransfer", "Storing float array. Number of values: ${value.size}")
+        fun storeFloatArray(values: FloatArray) {
+            GlobalScope.launch {
+                val valuesDescription = values.map {
+                it.toString()}.joinToString(",")
+                Log.i("DataTransfer", "Values: $valuesDescription")
+            }
+
         }
 
     }

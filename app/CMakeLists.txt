@@ -50,7 +50,12 @@ add_library(mfcc-lib
         src/main/cpp/Recorder.h
         src/main/cpp/Recorder.cpp
         src/main/cpp/CallbackWriter.h
-        src/main/cpp/CallbackWriter.cpp)
+        src/main/cpp/CallbackWriter.cpp
+        src/main/cpp/DataTransfer.h
+        src/main/cpp/DataTransfer.cpp
+        src/main/cpp/LoggerOutputVector.h
+        src/main/cpp/LoggerOutputVector.cpp
+        )
 
 
 include_directories(/home/student/workspace/MicrophoneInput/module/lib/x86_64/include/)
@@ -77,9 +82,6 @@ find_library( # Sets the name of the path variable.
         log)
 
 find_library(jnigraphics-lib jnigraphics)
-
-message(ERROR "Test23: ${jnigraphics-lib}")
-message(ERROR "Test24: ${log-lib}")
 
 #target_include_directories( PRIVATE
 #        ${SAMPLE_ROOT_DIR}/debug-utils)

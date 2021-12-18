@@ -12,6 +12,8 @@ class CallbackWriter : public essentia::streaming::Algorithm {
 public:
     CallbackWriter(JavaVM *jvm, jclass* dataTransferClass);
 
+    void declareParameters();
+
 
 protected:
     essentia::streaming::Sink<std::vector<essentia::Real>> _data;
@@ -26,8 +28,6 @@ private:
     void writeToken(const std::vector<essentia::Real> value);
 
     essentia::streaming::AlgorithmStatus process();
-
-    void declareParameters();
 
 //    bool attachToVmIfNecessary(JavaVM *jvm);
 

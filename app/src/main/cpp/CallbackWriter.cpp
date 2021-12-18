@@ -93,12 +93,15 @@ void CallbackWriter::writeToken(const std::vector<essentia::Real> value) {
     jfloatArray convertedValues = env->NewFloatArray(numberOfValues);
     jfloat tempValues[numberOfValues];
 
+    std::string  valuesText("Values: ");
     for(int i = 0; i < numberOfValues; ++i) {
         tempValues[i] = value[i];
+        valuesText = valuesText.append(std::to_string(value[i])).append(",");
     }
+    // TODO Just here for debugging
+    LOGI("%s", valuesText.c_str());
 
     env->SetFloatArrayRegion(convertedValues, 0, numberOfValues, tempValues);
-
 
 // TODO For now just trying to call method and see if value is passed
 //    env->CallStaticVoidMethod(*dataTransferClass, methodId, 5.0f); //(float)value.at(0));

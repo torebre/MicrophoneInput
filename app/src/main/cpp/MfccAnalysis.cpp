@@ -17,6 +17,7 @@
 #include <essentia/algorithmfactory.h>
 
 #include "CallbackWriter.h"
+#include "LoggerOutputVector.h"
 
 
 using namespace oboe;
@@ -129,7 +130,8 @@ void MfccAnalysis::setupNetwork() {
     essentia::streaming::Algorithm *w = factory.create("Windowing",
                                                        "type", "blackmanharris62");
 
-    essentia::streaming::Algorithm *spec = factory.create("Spectrum");
+    // TODO Should the size parameter be equal to the frameSize?
+    essentia::streaming::Algorithm *spec = factory.create("Spectrum", "size", frameSize);
     essentia::streaming::Algorithm *mfcc = factory.create("MFCC");
 
     auto *outputWriter = new CallbackWriter(jvm, dataTransferClass);
@@ -137,10 +139,16 @@ void MfccAnalysis::setupNetwork() {
     gen->output("signal") >> fc->input("signal");
     fc->output("frame") >> w->input("frame");
     w->output("frame") >> spec->input("frame");
+
     spec->output("spectrum") >> mfcc->input("spectrum");
     mfcc->output("bands") >> essentia::streaming::NOWHERE;
-
     essentia::streaming::connect(mfcc->output("mfcc"), outputWriter->input("input"));
+
+//    mfcc->output("mfcc") >> essentia::streaming::NOWHERE;
+//    essentia::streaming::connect(mfcc->output("bands"), outputWriter->input("input"));
+
+//    auto *loggerOutputVector = new LoggerOutputVector();
+//    essentia::streaming::connect(spec->output("spectrum"), loggerOutputVector->input("input"));
 
     LOGI("Finished setting up network");
 }
