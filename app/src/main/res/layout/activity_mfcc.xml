@@ -4,15 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".mfcc.MfccActivity">
+    tools:context="com.kjipo.microphoneinput.mfcc.MfccActivity">
+
+
+    <com.kjipo.microphoneinput.mfcc.SpectrumGraph
+        android:id="@+id/spectrumGraph"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@id/btnMfccStart"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnMfccStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/start_mfcc"
+        android:textColor="#795548"
+        app:layout_constraintTop_toBottomOf="@id/spectrumGraph"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintHorizontal_bias="0.575"
+        app:layout_constraintStart_toStartOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

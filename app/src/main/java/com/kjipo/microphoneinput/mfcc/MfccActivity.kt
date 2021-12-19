@@ -4,14 +4,13 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.kjipo.microphoneinput.MicrophoneRecording
-import com.kjipo.microphoneinput.colourwheel.ColourWheelModel
+import androidx.lifecycle.ViewModelProviders
 import kjipo.com.microphoneinput.R
 import kotlinx.android.synthetic.main.activity_mfcc.*
 
 class MfccActivity : AppCompatActivity() {
     private lateinit var audioManager: AudioManager
-    private lateinit var model: ColourWheelModel
+    private lateinit var model: SpectrumGraphModel
 
     private var currentlyRecording = false
 
@@ -31,7 +30,13 @@ class MfccActivity : AppCompatActivity() {
             record()
         }
 
+        model = ViewModelProviders.of(this)[SpectrumGraphModel::class.java]
+        model.lineData.observe(this, { lineData ->
+                spectrumGraph.updateData(lineData)
+        })
+
     }
+
 
 
     private fun setupAudioDeviceCallback() {
